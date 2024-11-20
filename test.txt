@@ -1,2 +1,7 @@
 테스트. 24.11.20
+<<<<<<< HEAD
 테스트2....
+=======
+테스트2....
+desktop  
+>>>>>>> 4097b5f (Update test.txt and blogproject)
