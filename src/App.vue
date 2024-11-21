@@ -1,16 +1,19 @@
 <template>
   <div id="app">
-    <UserLogin />
+    <router-view>
+    </router-view>
   </div>
 </template>
 
 <script>
-import UserLogin from './components/UserLogin.vue';
+//import MainPage from './components/MainPage.vue';
+//import UserLogin from './components/UserLogin.vue';
 
 export default {
   name: 'App',
   components: {
-    UserLogin,
+    //UserLogin,
+    //MainPage
   }
 }
 </script>
