@@ -43,15 +43,18 @@ app.post('/signup', (req, res) => {
 app.post('/login', (req, res) => {
   const { id, password } = req.body;
 
-  // MySQL에서 사용자 정보 확인
+  console.log('로그인 요청 데이터:', req.body); // 요청 데이터 로그 출력
+
   const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
   db.query(query, [id, password], (err, results) => {
     if (err) {
       console.error('로그인 중 오류 발생:', err);
       res.status(500).json({ message: '로그인 실패' });
     } else if (results.length > 0) {
+      console.log('로그인 성공:', results[0]); // 성공 로그 출력
       res.status(200).json({ message: '로그인 성공!', user: results[0] });
     } else {
+      console.log('로그인 실패: 아이디 또는 비밀번호 불일치');
       res.status(401).json({ message: '아이디 또는 비밀번호가 잘못되었습니다.' });
     }
   });
