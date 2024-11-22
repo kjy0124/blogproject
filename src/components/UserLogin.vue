@@ -1,26 +1,60 @@
-<template lang="ko">
+<template>
   <div class="container">
-    <h1>BlogProject</h1>
+    <h1>
+      <router-link to="/" class="blog-title">BlogProject</router-link>
+    </h1>
     <div class="login-container">
       <h2>Login</h2>
-      <form method="post" action="서버의 url" id="login-form">
+      <form @submit.prevent="login" id="login-form">
         <label for="userId">아이디</label>
-        <input type="text" name="userId" placeholder="아이디를 입력하세요.">
-
+        <input type="text" name="userId" v-model="email" placeholder="아이디를 입력하세요.">
         <label for="userPassword">비밀번호</label>
-        <input type="password" name="userPassword" placeholder="비밀번호를 입력하세요.">
+        <input type="password" name="userPassword" v-model="password" placeholder="비밀번호를 입력하세요.">
         
         <div class="button-group">
-          <input type="submit" value="Login">
-          <button type="button" class="signUp-button">회원가입</button>
+          <button type="submit" class="submit-button">Login</button>
+          <button type="button" class="signup-button" @click="goToSignUp">회원가입</button>
         </div>
       </form>
     </div>
   </div>
 </template>
 <script>
+import axios from 'axios';
 export default {
   name: 'UserLogin',
+  data() {
+    return {
+      email: '',
+      password: '',
+    };
+  },
+  methods: {
+    goToSignUp() {
+      this.$router.push('/signup');
+    },
+    login() {
+    const loginData = {
+      id: this.email,
+      password: this.password,
+    };
+
+    axios.post('http://localhost:3000/login', loginData)
+      .then(response => {
+        alert(response.data.message); // 성공 메시지 출력
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          // 로그인 성공 시 사용자 정보 저장
+          console.log('로그인된 사용자:', response.data.user);
+          this.$router.push('/'); // 메인 화면으로 이동
+        }
+      })
+      .catch(error => {
+        console.error('로그인 오류:', error);
+        alert('로그인 실패! 아이디와 비밀번호를 확인하세요.');
+      });
+    }
+  }
 }
 </script>
 <style>
@@ -111,8 +145,10 @@ export default {
     background-color: #f8f8f8;
   }
 
-  .signUp-button {
-    width: 48%;
+  /* 로그인, 회원가입 버튼  */
+  .submit-button,
+  .signup-button {
+    width: 35%;
     padding: 10px;
     font-size: 14px;
     color: #333;
@@ -122,7 +158,16 @@ export default {
     cursor: pointer;
   }
 
-  .signUp-button:hover {
+
+  .submit-button:hover,
+  .signup-button:hover {
     background-color: #5a6268;
+  }
+
+  /* 상단 BlogProject */
+  .blog-title {
+    text-decoration: none;
+    color: #000;
+    font-size: 32px;
   }
 </style>

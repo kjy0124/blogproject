@@ -4,8 +4,9 @@
       <button class="menu-button" @dragstart="onDragStart" draggable="true">목록</button>
       <h1 class="blog-title">Blog Project</h1>
       <div class="header-buttons">
-        <button class="action-button">글작성</button>
-        <button class="action-button">로그인</button>
+        <button v-if="!isLoggedIn" class="action-button" @click="goToLogin">로그인</button>
+        <button v-else class="action-button" @click="logout">로그아웃</button>
+        <button v-if="isLoggedIn" class="action-button">글작성</button>
       </div>
     </header>
 
@@ -45,6 +46,7 @@ export default {
         { id: 2, title: "두번째 포스트", content: "두번째 포스트 내용" },
       ],
       previewVisible: false, // 미리보기 표시 여부
+      isLoggedIn: !!localStorage.getItem('user'),//로그인 여부
     };
   },
   methods: {
@@ -56,6 +58,14 @@ export default {
       if (draggedItem === "menu-button") {
         this.previewVisible = true;
       }
+    },
+    goToLogin() {
+      this.$router.push('/login')
+    },
+    logout() {
+      localStorage.removeItem('user');
+      this.isLoggedIn = false;
+      alert('로그아웃 되었습니다.');
     },
   },
 };
