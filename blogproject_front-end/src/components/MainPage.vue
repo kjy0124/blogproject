@@ -1,7 +1,7 @@
 <template>
   <div class="blog-container">
     <header class="blog-header">
-      <button class="menu-button" @dragstart="onDragStart" draggable="true">목록</button>
+      <button class="menu-button" @click="goToPostList">목록</button>
       <h1 class="blog-title">Blog Project</h1>
       <div class="header-buttons">
         <button v-if="!isLoggedIn" class="action-button" @click="goToUserLogin">로그인</button>
@@ -72,7 +72,7 @@ export default {
     goToCreatePage(){
       this.$router.push('/create');
     },
-    goToUserLogin(){
+    goToLogin(){
       this.$router.push('/login');
     },
     goToPostList(){
