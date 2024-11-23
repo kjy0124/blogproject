@@ -4,9 +4,9 @@
       <button class="menu-button" @dragstart="onDragStart" draggable="true">목록</button>
       <h1 class="blog-title">Blog Project</h1>
       <div class="header-buttons">
-        <button v-if="!isLoggedIn" class="action-button" @click="goToLogin">로그인</button>
+        <button v-if="!isLoggedIn" class="action-button" @click="goToUserLogin">로그인</button>
         <button v-else class="action-button" @click="logout">로그아웃</button>
-        <button v-if="isLoggedIn" class="action-button">글작성</button>
+        <button v-if="isLoggedIn" class="action-button" @click="goToCreatePage">글작성</button>
       </div>
     </header>
 
@@ -47,6 +47,13 @@ export default {
       isLoggedIn: !!localStorage.getItem('user'),//로그인 여부
     };
   },
+
+  // mounted() {
+  //   if (this.isLoggedIn) {
+  //     this.$router.push('/create');
+  //   }
+  // },
+
   methods: {
     onDragStart(event) {
       event.dataTransfer.setData("text", "menu-button");
