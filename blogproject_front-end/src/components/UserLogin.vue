@@ -1,4 +1,4 @@
-<template><!--로그인 페이지-->
+<template>
   <div class="container">
     <h1>
       <router-link to="/" class="blog-title">BlogProject</router-link>

@@ -1,11 +1,12 @@
-<template><!--메인 페이지-->
+<template>
   <div class="blog-container">
     <header class="blog-header">
-      <button class="menu-button" @click="goToPostList">목록</button>
+      <button class="menu-button" @dragstart="onDragStart" draggable="true">목록</button>
       <h1 class="blog-title">Blog Project</h1>
       <div class="header-buttons">
-        <button class="action-button" @click="goToCreatePage">글작성</button>
-        <button class="action-button" @click="goToUserLogin">로그인</button>
+        <button v-if="!isLoggedIn" class="action-button" @click="goToLogin">로그인</button>
+        <button v-else class="action-button" @click="logout">로그아웃</button>
+        <button v-if="isLoggedIn" class="action-button">글작성</button>
       </div>
     </header>
 
@@ -42,10 +43,25 @@ export default {
         { id: 1, title: "첫번째 포스트", content: "첫번째 포스트 내용" },
         { id: 2, title: "두번째 포스트", content: "두번째 포스트 내용" },
       ],
-      previewVisible: false,
+      previewVisible: false, // 미리보기 표시 여부
+      isLoggedIn: !!localStorage.getItem('user'),//로그인 여부
     };
   },
   methods: {
+    onDragStart(event) {
+      event.dataTransfer.setData("text", "menu-button");
+    },
+    onDrop(event) {
+      const draggedItem = event.dataTransfer.getData("text");
+      if (draggedItem === "menu-button") {
+        this.previewVisible = true;
+      }
+    },
+    logout() {
+      localStorage.removeItem('user');
+      this.isLoggedIn = false;
+      alert('로그아웃 되었습니다.');
+    },
     goToCreatePage(){
       this.$router.push('/create');
     },
@@ -65,15 +81,15 @@ export default {
   margin: 0 auto;
   max-width: 1000px;
   padding: 20px;
-  border: 2px solid #ddd; 
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-  background-color: #aba6a6;
+  border: 2px solid #ddd; /* 전체 컨테이너 테두리 */
+  border-radius: 10px; /* 둥근 모서리 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  background-color: #aba6a6; /* 회색 배경 */
 }
 
 .blog-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* 왼쪽, 가운데, 오른쪽 배치 */
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid #ccc;
@@ -97,7 +113,7 @@ export default {
 
 .header-buttons {
   display: flex;
-  gap: 10px;
+  gap: 10px; /* 버튼 간격 */
 }
 
 .action-button {
@@ -113,7 +129,7 @@ export default {
 .main-content {
   display: flex;
   margin-top: 20px;
-  gap: 20px; 
+  gap: 20px; /* 미리보기와 포스트 리스트 사이의 간격 */
 }
 
 .preview-panel {
