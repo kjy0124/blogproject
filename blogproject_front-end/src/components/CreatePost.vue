@@ -38,11 +38,35 @@ export default {
   },
   methods: {
     submitPost() {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+      if (!currentUser || !currentUser.name) {
+        alert.apply('로그인이 필요합니다.');
+        this.$router.push('/login');
+        return;
+      }
+
       this.content = this.editor.root.innerHTML;
-      console.log("제목:", this.title);
-      console.log("내용:", this.content);
-      this.$router.push('/');
+
+      //새로운 글 데이터 작성
+      const newPost = {
+        id: Date.now(),
+        name: currentUser.name,
+        title: this.title,
+        content: this.content,
+        date: new Date().toISOString().split('T')[0], 
+        views: 0, //초기 조회수
+      };
+
+      //기존 데이터 불러오기
+      const existingPosts = JSON.parse(localStorage.getItem('posts')) || [];
+
+      existingPosts.push(newPost);
+      localStorage.setItem('posts', JSON.stringify(existingPosts));
+
+      this.$router.push('/list');
     },
+
     logout() {
       localStorage.removeItem('user');
       this.$router.push('/login');

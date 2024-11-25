@@ -3,7 +3,7 @@
     <h1>글 목록</h1>
     <div class="post-list">
       <div v-for="post in posts" :key="post.id" class="post-item">
-        <span class="author">글쓴이: {{ post.author }}</span>
+        <span class="author">글쓴이: {{ post.name }}</span>
         <h2 class="title">{{ post.title }}</h2>
         <span class="date">작성일: {{ post.date }}</span>
         <p class="views">조회수: {{ post.views }}</p>
@@ -18,9 +18,7 @@ export default {
   name: 'PostList',
   data() {
     return {
-      posts: [ // 임시 데이터
-        { id: 1, author: '홍길동', title: '첫 번째 글', date: '2024-11-20', views: 120 },
-      ],
+      posts: [],//초기값 비움
     };
   },
   methods: {
@@ -28,6 +26,11 @@ export default {
       this.$router.push('/create');
     },
   },
+  mounted() {
+    //localStorage데이터 불러오기
+    const storedPosts = JSON.parse(localStorage.getItem('posts')) || [];
+    this.posts = storedPosts;
+  }
 };
 </script>
 

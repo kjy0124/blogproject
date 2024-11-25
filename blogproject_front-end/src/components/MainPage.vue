@@ -72,7 +72,7 @@ export default {
     goToCreatePage(){
       this.$router.push('/create');
     },
-    goToLogin(){
+    goToUserLogin(){
       this.$router.push('/login');
     },
     goToPostList(){
