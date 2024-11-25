@@ -11,7 +11,7 @@
     </header>
 
     <div class="main-content">
-      <aside 
+      <!-- <aside 
         class="preview-panel"
         @dragover.prevent 
         @drop="onDrop"
@@ -22,7 +22,7 @@
             {{ post.title }}
           </li>
         </ul>
-      </aside>
+      </aside> -->
 
       <main class="post-list">
         <div v-for="post in posts" :key="post.id" class="post-item">
