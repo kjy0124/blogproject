@@ -43,7 +43,6 @@ export default {
       .then(response => {
         alert(response.data.message); // 성공 메시지 출력
         if (response.data.user) {
-          localStorage.setItem('user', JSON.stringify(response.data.user));
           // 로그인 성공 시 사용자 정보 저장
           console.log('로그인된 사용자:', response.data.user);
           this.$router.push('/'); // 메인 화면으로 이동
