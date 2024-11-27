@@ -1,4 +1,5 @@
-<template><!--글 수정 페이지-->
+<template>
+  <!-- 글 수정 페이지 -->
   <div class="edit-post-container">
     <h1>글 수정</h1>
     <form @submit.prevent="submitPost">
@@ -26,16 +27,62 @@ export default {
     return {
       title: '',
       content: '',
+      postId: null, // 글 ID
     };
   },
+  created() {
+    this.loadPostData();
+  },
   methods: {
-    submitPost() {
-      console.log("제목:", this.title);
-      console.log("내용:", this.content);
-      this.$router.push('/');
+    // 해당 ID의 포스트 데이터를 불러오는 메서드
+    loadPostData() {
+      // URL에서 전달된 post ID를 가져옵니다.
+      const postId = this.$route.params.id;
+      this.postId = postId;
+
+      // localStorage에서 글 목록 가져오기
+      const posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+      // 해당 ID의 포스트를 찾습니다.
+      const post = posts.find(post => post.id === parseInt(postId));
+
+      if (post) {
+        // 찾은 글의 데이터를 title과 content에 바인딩
+        this.title = post.title;
+        this.content = post.content;
+      } else {
+        // 글을 찾을 수 없으면 404 페이지나 다른 처리
+        this.$router.push('/list'); // 예시로 글 목록으로 이동
+      }
     },
+    
+    // 수정된 글을 저장하는 메서드
+    submitPost() {
+      // localStorage에서 글 목록 가져오기
+      const posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+      // 해당 ID의 포스트를 찾고 수정
+      const postIndex = posts.findIndex(post => post.id === this.postId);
+      
+      if (postIndex !== -1) {
+        // 글 수정
+        posts[postIndex].title = this.title;
+        posts[postIndex].content = this.content;
+
+        // 업데이트된 게시물을 localStorage에 저장
+        localStorage.setItem("posts", JSON.stringify(posts));
+        console.log("수정된 글 저장 완료:", posts[postIndex]); // 수정된 글을 콘솔에 출력하여 확인
+      } else {
+        console.log("해당 글을 찾을 수 없습니다."); // 글을 못 찾은 경우 로그
+      }
+
+      // 글 목록 페이지로 이동
+      this.$router.push('/list');
+    },
+
+    // 수정 취소 (글 목록으로 돌아가기)
     cancelEdit() {
-      this.$router.push('/');
+      this.$router.push('/list');
     }
   }
 };

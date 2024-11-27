@@ -50,11 +50,11 @@ export default {
 
       //새로운 글 데이터 작성
       const newPost = {
-        id: Date.now(),
-        name: currentUser.name,
-        title: this.title,
-        content: this.content,
-        date: new Date().toISOString().split('T')[0], 
+        id: Date.now(), //고유 ID
+        name: currentUser.name, //작성자 이름
+        title: this.title, //글 제목
+        content: this.content, //글 내용
+        date: new Date().toISOString(), 
         views: 0, //초기 조회수
       };
 

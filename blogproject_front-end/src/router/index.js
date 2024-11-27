@@ -5,6 +5,8 @@ import SignUp from '@/components/SignUp.vue';
 import CreatePost from '@/components/CreatePost.vue';
 import EditPost from '@/components/EditPost.vue';
 import PostList from '@/components/PostList.vue';
+import PostDetail from '@/components/PostDetail.vue';
+import DeletePost from '@/components/DeletePost.vue';
 
 const routes = [
   {
@@ -28,15 +30,28 @@ const routes = [
     component: CreatePost
   },
   {
-    path:'/edit',
+    path:'/edit/:id',
     name: 'EditPost',
-    component: EditPost
+    component: EditPost,
+    props: true
   },
   {
     path:'/list',
     name: 'PostList',
     component: PostList
+  },
+  {
+    path: '/detail/:id',
+    name: 'PostDetail',
+    component: PostDetail,
+    props: true
+  },
+  {
+    path: '/delete',
+    name: 'DeletePost',
+    component: DeletePost
   }
+  
 ];
 
 const router = createRouter({
