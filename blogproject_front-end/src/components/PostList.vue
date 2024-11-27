@@ -15,7 +15,7 @@
         <div v-for="post in paginatedPosts" :key="post.id" class="post-item">
           <span class="author">글쓴이: {{ post.name }}</span>
           <h2 class="title">{{ post.title }}</h2>
-          <span class="date">작성일: {{ post.date }}</span>
+          <span class="date">작성일: {{ formatDate(post.date) }}</span>
           <p class="views">조회수: {{ post.views }}</p>
         </div>
       </div>
@@ -71,6 +71,17 @@ export default {
       if (event.key === 'currentUser') {
         this.isLoggedIn = !!localStorage.getItem('currentUser');
       }
+    },
+
+    formatDate(dateString) {
+      // 날짜를 YYYY-MM-DD HH:mm 형식으로 포맷팅
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // 월은 0부터 시작하므로 +1
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
     },
 
     changePage(page) {
