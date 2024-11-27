@@ -44,16 +44,15 @@ export default {
         { id: 2, title: "두번째 포스트", content: "두번째 포스트 내용" },
       ],
       previewVisible: false, // 미리보기 표시 여부
-      isLoggedIn: !!localStorage.getItem('user'),//로그인 여부
+      isLoggedIn: !!localStorage.getItem('currentUser'),//로그인 여부
     };
   },
 
-  // mounted() {
-  //   if (this.isLoggedIn) {
-  //     this.$router.push('/create');
-  //   }
-  // },
-
+  mounted(){
+    const sortedPost = JSON.parse(localStorage.getItem('posts')) || [];
+    this.posts = sortedPost.sort((a, b) => new Date(b.date) - new Date(a.date))
+    window.addEventListener('storage', this.syncLoginState);
+  },
   methods: {
     onDragStart(event) {
       event.dataTransfer.setData("text", "menu-button");
@@ -65,10 +64,16 @@ export default {
       }
     },
     logout() {
-      localStorage.removeItem('user');
+      localStorage.removeItem('currentUser');
       this.isLoggedIn = false;
       alert('로그아웃 되었습니다.');
     },
+    syncLoginState(event) {
+      if (event.key === 'currentUser') {
+        this.isLoggedIn = !!localStorage.getItem('currentUser');
+      }
+    },
+
     goToCreatePage(){
       this.$router.push('/create');
     },
@@ -77,7 +82,10 @@ export default {
     },
     goToPostList(){
       this.$router.push('/list');
-    }
+    },
+  },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.syncLoginState);
   },
 };
 </script>

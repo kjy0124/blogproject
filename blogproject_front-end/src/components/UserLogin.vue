@@ -45,6 +45,8 @@ export default {
         if (response.data.user) {
           // 로그인 성공 시 사용자 정보 저장
           console.log('로그인된 사용자:', response.data.user);
+          localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+          window.dispatchEvent(new Event('storage'));
           this.$router.push('/'); // 메인 화면으로 이동
         }
       })

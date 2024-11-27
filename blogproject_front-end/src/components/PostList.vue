@@ -6,7 +6,8 @@
       <h1>
         <router-link to="/" class="blog_title">BlogProject</router-link>
       </h1>
-      <button class="logout-button" @click="logout">로그아웃</button>
+      <button v-if="!isLoggedIn" class="logout-button" @click="goToUserLogin">로그인</button>
+      <button v-else class="logout-button" @click="logout">로그아웃</button>
     </header>
     <div class="post-list-container">
       <h2 class="post-list-title">글 목록</h2>
@@ -37,6 +38,7 @@ export default {
       posts: [], //초기값 비움
       currentPage: 1, //현재 페이지
       postPerPage: 5, // 페이지당 글 개수
+      isLoggedIn: !!localStorage.getItem('currentUser'),//로그인 여부
     };
   },
 
@@ -48,7 +50,7 @@ export default {
       //현재 페이지에 해당하는 글 목록 계산
       const startIndex = (this.currentPage - 1) * this.postPerPage;
       const endIndex = startIndex + this.postPerPage;
-      return this.posts.slice(startIndex, endIndex);
+      return this.sortedPosts.slice(startIndex, endIndex);
     },
     //총 페이지 수 계산
     totalPages() {
@@ -62,19 +64,32 @@ export default {
     },
 
     logout() {
-      localStorage.removeItem("user");
+      localStorage.removeItem("currentUser");
       this.$router.push("/login");
     },
+    syncLoginState(event) {
+      if (event.key === 'currentUser') {
+        this.isLoggedIn = !!localStorage.getItem('currentUser');
+      }
+    },
+
     changePage(page) {
       //페이지 변경
       this.currentPage = page;
-    }
+    },
+    goToUserLogin(){
+      this.$router.push('/login');
+    },
   },
   mounted() {
     //localStorage데이터 불러오기
     const storedPosts = JSON.parse(localStorage.getItem("posts")) || [];
     this.posts = storedPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    window.addEventListener('storage', this.syncLoginState);
   },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.syncLoginState);
+  }
 };
 </script>
 

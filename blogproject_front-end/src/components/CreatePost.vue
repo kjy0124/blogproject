@@ -34,6 +34,7 @@ export default {
     return {
       title: '',
       content: '',
+      isLoggedIn: !!localStorage.getItem('currentUser'),
     };
   },
   methods: {
@@ -64,12 +65,21 @@ export default {
       existingPosts.push(newPost);
       localStorage.setItem('posts', JSON.stringify(existingPosts));
 
+      alert('글이 성공적으로 작성되었습니다.');
       this.$router.push('/list');
     },
 
     logout() {
-      localStorage.removeItem('user');
+      localStorage.removeItem('currentUser');
+      this.isLoggedIn = false;
+      alert('로그아웃 되었습니다.');
       this.$router.push('/login');
+    },
+
+    syncLoginState(event) {
+      if (event.key === 'currentUser') {
+        this.isLoggedIn = !!localStorage.getItem('currentUser');
+      }
     },
   },
   mounted() {
@@ -77,6 +87,7 @@ export default {
     this.editor = new Quill("#editor", {
       theme: "snow", // 기본 테마 설정
       placeholder: "내용을 입력하세요.",
+
       modules: {
         toolbar: [
           ["bold", "italic", "underline", "strike"], // 텍스트 꾸미기
@@ -88,6 +99,17 @@ export default {
         ],
       },
     });
+
+    window.addEventListener("storage", this.syncLoginState);
+
+    if (!this.isLoggedIn) {
+      alert("로그인이 필요합니다.");
+      this.$router.push("/login");
+    }
+  },
+
+  beforeUnmount() {
+    window.removeEventListener("storage", this.syncLoginState);
   },
 };
 
