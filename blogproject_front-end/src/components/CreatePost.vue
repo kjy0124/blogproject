@@ -192,18 +192,4 @@ export default {
 .complete-button:hover {
   background: #0056b3;
 }
-/* 
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  border-radius: 5px;
-  align-self: flex-end;
-}
-
-button:hover {
-  background-color: #0056b3;
-} */
 </style>

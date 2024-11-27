@@ -11,23 +11,10 @@
     </header>
 
     <div class="main-content">
-      <!-- <aside 
-        class="preview-panel"
-        @dragover.prevent 
-        @drop="onDrop"
-      >
-        <h3>목록 미리보기</h3>
-        <ul v-if="previewVisible">
-          <li v-for="post in posts" :key="post.id">
-            {{ post.title }}
-          </li>
-        </ul>
-      </aside> -->
-
       <main class="post-list">
         <div v-for="post in posts" :key="post.id" class="post-item">
           <h2>{{ post.title }}</h2>
-          <p>{{ post.content }}</p>
+          <p v-html="post.content"></p>
         </div>
       </main>
     </div>
