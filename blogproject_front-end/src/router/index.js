@@ -6,7 +6,6 @@ import CreatePost from '@/components/CreatePost.vue';
 import EditPost from '@/components/EditPost.vue';
 import PostList from '@/components/PostList.vue';
 import PostDetail from '@/components/PostDetail.vue';
-import DeletePost from '@/components/DeletePost.vue';
 
 const routes = [
   {
@@ -46,12 +45,6 @@ const routes = [
     component: PostDetail,
     props: true
   },
-  {
-    path: '/delete',
-    name: 'DeletePost',
-    component: DeletePost
-  }
-  
 ];
 
 const router = createRouter({

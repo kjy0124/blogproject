@@ -1,4 +1,4 @@
-<template>
+<template><!--회원가입-->
   <div class="container">
     <h1>
       <router-link to="/" class="blog-title">BlogProject</router-link>

@@ -1,4 +1,4 @@
-<template>
+<template><!--글목록-->
   <div class="container">
     <header>
       <h1>
@@ -120,11 +120,21 @@ export default {
 }
 
 .header {
-  background-color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  margin-bottom: 20px;
+}
+
+.blog_title {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+  text-decoration: none;
+  color: black;
 }
 
 
@@ -137,13 +147,6 @@ export default {
   display: flex;
   flex-direction: column;
   height: 500px;
-}
-
-.blog_title {
-  font-size: 20px;
-  font-weight: bold;
-  text-decoration: none;
-  color: black;
 }
 
 .logout-button {
@@ -178,6 +181,14 @@ export default {
   padding: 15px;
   border-radius: 5px;
   border: 1px solid #ddd;
+}
+
+.blog_title{
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 24px;
+  border-radius: 5px;
 }
 
 .author,

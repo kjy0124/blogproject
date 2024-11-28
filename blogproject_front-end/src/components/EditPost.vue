@@ -1,5 +1,4 @@
-<template>
-  <!-- 글 수정 페이지 -->
+<template><!-- 글 수정 페이지 -->
   <div class="edit-post-container">
     <h1>글 수정</h1>
     <form @submit.prevent="submitPost">
@@ -11,7 +10,6 @@
         <label for="content">내용</label>
         <textarea v-model="content" id="content" required></textarea>
       </div>
-      
       <div class="button-group">
         <button type="button" @click="cancelEdit">취소</button>
         <button type="submit">수정 완료</button>
@@ -37,22 +35,23 @@ export default {
     // 해당 ID의 포스트 데이터를 불러오는 메서드
     loadPostData() {
       // URL에서 전달된 post ID를 가져옵니다.
-      const postId = this.$route.params.id;
+      const postId = parseInt(this.$route.params.id); // 정수 변환
       this.postId = postId;
 
       // localStorage에서 글 목록 가져오기
       const posts = JSON.parse(localStorage.getItem("posts")) || [];
+      console.log("현재 저장된 posts:", posts);
 
       // 해당 ID의 포스트를 찾습니다.
-      const post = posts.find(post => post.id === parseInt(postId));
+      const post = posts.find(post => post.id === postId);
 
       if (post) {
         // 찾은 글의 데이터를 title과 content에 바인딩
         this.title = post.title;
         this.content = post.content;
       } else {
-        // 글을 찾을 수 없으면 404 페이지나 다른 처리
-        this.$router.push('/list'); // 예시로 글 목록으로 이동
+        console.error("글을 찾을 수 없습니다.");
+        this.$router.push('/list'); // 글 목록으로 이동
       }
     },
     
@@ -60,10 +59,11 @@ export default {
     submitPost() {
       // localStorage에서 글 목록 가져오기
       const posts = JSON.parse(localStorage.getItem("posts")) || [];
+      console.log("수정 전 posts:", posts);
 
       // 해당 ID의 포스트를 찾고 수정
       const postIndex = posts.findIndex(post => post.id === this.postId);
-      
+
       if (postIndex !== -1) {
         // 글 수정
         posts[postIndex].title = this.title;
@@ -71,12 +71,14 @@ export default {
 
         // 업데이트된 게시물을 localStorage에 저장
         localStorage.setItem("posts", JSON.stringify(posts));
-        console.log("수정된 글 저장 완료:", posts[postIndex]); // 수정된 글을 콘솔에 출력하여 확인
+        console.log("수정된 글 저장 완료:", posts[postIndex]); // 수정된 글 확인 로그
       } else {
-        console.log("해당 글을 찾을 수 없습니다."); // 글을 못 찾은 경우 로그
+        console.error("수정할 글을 찾을 수 없습니다."); // 글을 못 찾은 경우 로그
+        return; // 종료
       }
 
       // 글 목록 페이지로 이동
+      alert("글이 성공적으로 수정되었습니다.");
       this.$router.push('/list');
     },
 
@@ -87,6 +89,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 body {

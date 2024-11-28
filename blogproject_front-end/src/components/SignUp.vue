@@ -1,4 +1,4 @@
-<template>
+<template><!--로그인-->
   <div class="container">
     <router-link to="/" class="blogTitle">BlogProject</router-link>
     <div class="signup-container">

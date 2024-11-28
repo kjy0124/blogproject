@@ -1,12 +1,14 @@
-<template>
+<template><!--글 상세-->
   <div class="container">
+    <h1>
+        <router-link to="/" class="blog_title">BlogProject</router-link>
+      </h1>
     <div class="post-detail">
       <h1>{{ post.title }}</h1>
       <p><strong>글쓴이:</strong> {{ post.name }}</p>
       <p><strong>작성일:</strong> {{ post.date }}</p>
       <p><strong>조회수:</strong> {{ post.views }}</p>
       <div v-html="post.content"></div> <!-- Quill에서 저장된 HTML 내용을 보여줌 -->
-      
       <div class="button-container">
         <button @click="editPost" class="edit-btn">수정</button>
         <button @click="deletePost" class="delete-btn">삭제</button>
@@ -28,7 +30,8 @@ export default {
   methods: {
     getPostDetail() {
       // URL에서 전달된 post ID를 가져옵니다.
-      const postId = this.$route.params.id;
+      const postId = parseInt(this.$route.params.id); // 정수 변환
+      this.postId = postId;
       
       // localStorage에서 글 목록 가져오기
       const posts = JSON.parse(localStorage.getItem("posts")) || [];
@@ -52,16 +55,15 @@ export default {
     },
     // 글 삭제 기능
     deletePost() {
-      const posts = JSON.parse(localStorage.getItem("posts")) || [];
-      
+      if(confirm("정말 이 글을 삭제하시겠습니까?")){
+        const posts = JSON.parse(localStorage.getItem("posts")) || [];
       // 해당 포스트 삭제
       const updatedPosts = posts.filter(post => post.id !== this.post.id);
-      
       // 업데이트된 게시물 목록을 다시 localStorage에 저장
       localStorage.setItem("posts", JSON.stringify(updatedPosts));
-      
       // 글 목록 페이지로 이동
-      this.$router.push('/list');
+      this.$router.push('/list')
+      }
     }
   }
 };
@@ -72,6 +74,16 @@ export default {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+.blog_title {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+  text-decoration: none;
+  color: black;
 }
 
 .post-detail {
