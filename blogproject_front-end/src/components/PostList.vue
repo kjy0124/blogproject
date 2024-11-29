@@ -22,7 +22,9 @@
       </div>
 
       <div class="pagination">
-        <button v-for="page in totalPages" :key="page" @click="changePage(page)" :class="{ active: currentPage === page }" class="pagination-btn"></button>
+        <button v-for="page in totalPages" :key="page" @click="changePage(page)" :class="{ active: currentPage === page }" class="pagination-btn">
+          {{ page }}
+        </button>
       </div>
       <button type="button" @click="createPost" class="create-post-btn">글작성</button>
     </div>
@@ -123,7 +125,8 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
+  padding: 10px;
 }
 
 .blog_title {
@@ -135,6 +138,7 @@ export default {
   margin: 0;
   text-decoration: none;
   color: black;
+  background-color: transparent;
 }
 
 
@@ -158,6 +162,7 @@ export default {
   font-size: 12px;
   cursor: pointer;
   padding: 5px 16px;
+  background-color: transparent;
 }
 
 .post-list-title {

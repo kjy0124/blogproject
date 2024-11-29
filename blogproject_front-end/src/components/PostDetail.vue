@@ -1,8 +1,14 @@
 <template><!--글 상세-->
-  <div class="container">
-    <h1>
+  <div class="navbar">
+    <header>
+      <h1>
         <router-link to="/" class="blog_title">BlogProject</router-link>
       </h1>
+      <button v-if="!isLoggedIn" class="logout-button" @click="goToUserLogin">로그인</button>
+      <button v-else class="logout-button" @click="logout">로그아웃</button>
+    </header>
+  </div>
+  <div class="container">
     <div class="post-detail">
       <h1>{{ post.title }}</h1>
       <p><strong>글쓴이:</strong> {{ post.name }}</p>
@@ -22,6 +28,7 @@ export default {
   data() {
     return {
       post: null, // 상세 글 데이터
+      isLoggedIn: !!localStorage.getItem('currentUser'),
     };
   },
   created() {
@@ -53,6 +60,16 @@ export default {
     editPost() {
       this.$router.push(`/edit/${this.post.id}`);
     },
+
+    logout() {
+      localStorage.removeItem('user');
+      this.$router.push('/login');
+    },
+
+    goToUserLogin() {
+      this.$router.push('/login');
+    },
+    
     // 글 삭제 기능
     deletePost() {
       if(confirm("정말 이 글을 삭제하시겠습니까?")){
@@ -65,7 +82,7 @@ export default {
       this.$router.push('/list')
       }
     }
-  }
+  },
 };
 </script>
 
@@ -73,17 +90,37 @@ export default {
 .container {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 50px;
 }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .blog_title {
   position: absolute;
-  top: 12px;
+  top: 10px;
   left: 10px;
   font-size: 20px;
   font-weight: bold;
   margin: 0;
   text-decoration: none;
   color: black;
+}
+
+/* 로그아웃 버튼 */
+.logout-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  color: black;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: transparent;
 }
 
 .post-detail {
