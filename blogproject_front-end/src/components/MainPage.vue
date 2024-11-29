@@ -12,8 +12,11 @@
 
     <div class="main-content">
       <main class="post-list">
-        <div v-for="post in posts" :key="post.id" class="post-item">
+        <div v-for="post in sortedPost" :key="post.id" class="post-item">
           <h2>{{ post.title }}</h2>
+          <p>글쓴이 : {{ post.name }}</p>
+          <p>날짜 : {{ formatDate(post.date) }}</p>
+          <p>조회수 : {{ post.views }}</p>
           <p v-html="post.content"></p>
         </div>
       </main>
@@ -27,12 +30,26 @@ export default {
   data() {
     return {
       posts: [
-        { id: 1, title: "첫번째 포스트", content: "첫번째 포스트 내용" },
-        { id: 2, title: "두번째 포스트", content: "두번째 포스트 내용" },
+        {
+          id: 1,
+          title: '',
+          content: '',
+          author: '',
+          date: '',
+          views: 1,
+        }
       ],
       previewVisible: false, // 미리보기 표시 여부
       isLoggedIn: !!localStorage.getItem('currentUser'),//로그인 여부
     };
+  },
+
+  computed: {
+    sortedPost() {
+      return [...this.posts]
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 2);
+    },
   },
 
   mounted(){
@@ -69,6 +86,15 @@ export default {
     },
     goToPostList(){
       this.$router.push('/list');
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
     },
   },
   beforeUnmount() {
@@ -175,10 +201,16 @@ export default {
 }
 
 .post-item h2 {
-  margin: 0 0 5px 0;
+  /* margin: 0 0 5px 0; */
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #333;
 }
 
 .post-item p {
-  margin: 0;
+  /* margin: 0; */
+  margin: 5px 0;
+  font-size: 14px;
+  color: #555
 }
 </style>
