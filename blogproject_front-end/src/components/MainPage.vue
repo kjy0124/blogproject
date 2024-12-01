@@ -15,7 +15,7 @@
         <div v-for="post in sortedPost" :key="post.id" class="post-item">
           <h2>{{ post.title }}</h2>
           <p>글쓴이 : {{ post.name }}</p>
-          <p>날짜 : {{ formatDate(post.date) }}</p>
+          <p>날짜 : {{ formatDate(post.created_at) }}</p>
           <p>조회수 : {{ post.views }}</p>
           <p v-html="post.content"></p>
         </div>
@@ -53,9 +53,14 @@ export default {
   },
 
   mounted(){
-    const sortedPost = JSON.parse(localStorage.getItem('posts')) || [];
-    this.posts = sortedPost.sort((a, b) => new Date(b.date) - new Date(a.date))
-    window.addEventListener('storage', this.syncLoginState);
+    fetch('http://localhost:3000/list')
+    .then(response => response.json())
+    .then(data => {
+      this.posts = data.sort((a, b) => b.views - a.views);
+    })
+    .catch(error => console.error('Error fetching posts:', error));
+
+  window.addEventListener('storage', this.syncLoginState);
   },
   methods: {
     onDragStart(event) {

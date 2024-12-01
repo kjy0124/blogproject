@@ -1,14 +1,16 @@
-<template><!-- 글 수정 페이지 -->
+<template>
+  <!-- 글 수정 페이지 -->
   <div class="navbar">
     <header>
       <h1>
         <router-link to="/" class="blog_title">BlogProject</router-link>
       </h1>
-      <button v-if="!isLoggedIn" class="logout-button" @click="goToUserLogin">로그인</button>
+      <button v-if="!isLoggedIn" class="logout-button" @click="goToUserLogin">
+        로그인
+      </button>
       <button v-else class="logout-button" @click="logout">로그아웃</button>
     </header>
   </div>
-
 
   <div class="edit-post-container">
     <h1>글 수정</h1>
@@ -30,88 +32,78 @@
 </template>
 
 <script>
-import Quill from 'quill';
-import "quill/dist/quill.snow.css"
+import axios from "axios";
+import Quill from "quill";
+import "quill/dist/quill.snow.css";
 
 export default {
-  name: 'EditPost',
+  name: "EditPost",
   data() {
     return {
-      title: '',
-      content: '',
+      title: "",
+      content: "",
       postId: null, // 글 ID
-      isLoggedIn: !!localStorage.getItem('currentUser'),
+      isLoggedIn: !!localStorage.getItem("currentUser"),
     };
   },
   created() {
     this.loadPostData();
   },
   methods: {
-  
     // 해당 ID의 포스트 데이터를 불러오는 메서드
-    loadPostData() {
+    async loadPostData() {
       // URL에서 전달된 post ID를 가져옵니다.
       const postId = parseInt(this.$route.params.id); // 정수 변환
       this.postId = postId;
 
-      // localStorage에서 글 목록 가져오기
-      const posts = JSON.parse(localStorage.getItem("posts")) || [];
-      console.log("현재 저장된 posts:", posts);
-
-      // 해당 ID의 포스트를 찾습니다.
-      const post = posts.find(post => post.id === postId);
-
-      if (post) {
-        // 찾은 글의 데이터를 title과 content에 바인딩
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/detail/${postId}`
+        );
+        const post = response.data.post;
         this.title = post.title;
         this.content = post.content;
-      } else {
-        console.error("글을 찾을 수 없습니다.");
-        this.$router.push('/list'); // 글 목록으로 이동
+        if (this.editor) {
+          this.editor.root.innerHTML = this.content;
+        }
+      } catch (error) {
+        console.error("글을 찾을 수 없습니다:", error);
+        this.$router.push("/list");
       }
     },
-    
+
     // 수정된 글을 저장하는 메서드
-    submitPost() {
+    async submitPost() {
       this.content = this.editor.root.innerHTML;
 
-      // localStorage에서 글 목록 가져오기
-      const posts = JSON.parse(localStorage.getItem("posts")) || [];
-      console.log("수정 전 posts:", posts);
-
-      // 해당 ID의 포스트를 찾고 수정
-      const postIndex = posts.findIndex(post => post.id === this.postId);
-
-      if (postIndex !== -1) {
-        // 글 수정
-        posts[postIndex].title = this.title;
-        posts[postIndex].content = this.content;
-
-        // 업데이트된 게시물을 localStorage에 저장
-        localStorage.setItem("posts", JSON.stringify(posts));
-        console.log("수정된 글 저장 완료:", posts[postIndex]); // 수정된 글 확인 로그
-      } else {
-        console.error("수정할 글을 찾을 수 없습니다."); // 글을 못 찾은 경우 로그
-        return; // 종료
+      try {
+        const response = await axios.put(
+          `http://localhost:3000/detail/${this.postId}`,
+          {
+            title: this.title,
+            content: this.content,
+          }
+        );
+        console.log(response.data); // 성공 메시지 로그
+        alert("수정이 완료되었습니다.");
+        this.$router.push("/list");
+      } catch (error) {
+        console.error("글 수정 실패", error.response?.data || error.message);
+        alert("수정에 실패했습니다. 다시 시도해주세요.");
       }
-
-      // 글 목록 페이지로 이동
-      alert("글이 성공적으로 수정되었습니다.");
-      this.$router.push('/list');
     },
-
     // 수정 취소 (글 목록으로 돌아가기)
     cancelEdit() {
-      this.$router.push('/list');
+      this.$router.push("/list");
     },
 
     logout() {
-      localStorage.removeItem('user');
-      this.$router.push('/login');
+      localStorage.removeItem("user");
+      this.$router.push("/login");
     },
 
     goToUserLogin() {
-      this.$router.push('/login');
+      this.$router.push("/login");
     },
   },
   mounted() {
@@ -133,10 +125,9 @@ export default {
     if (this.content) {
       this.editor.root.innerHTML = this.content;
     }
-  }
+  },
 };
 </script>
-
 
 <style scoped>
 #editor {
@@ -210,7 +201,8 @@ form {
   margin-bottom: 5px;
 }
 
-.input-group input, .input-group textarea {
+.input-group input,
+.input-group textarea {
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -222,7 +214,6 @@ form {
 textarea {
   height: 150px;
 }
-
 
 .button-group {
   display: flex;
@@ -244,7 +235,7 @@ button:hover {
 }
 
 button[type="button"] {
-  background-color: #ccc; 
+  background-color: #ccc;
 }
 
 button[type="button"]:hover {

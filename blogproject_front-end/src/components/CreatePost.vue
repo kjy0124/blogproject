@@ -1,4 +1,5 @@
-<template><!--글작성 페이지-->
+<template>
+  <!--글작성 페이지-->
   <div class="create-post-container">
     <header>
       <h1>
@@ -10,14 +11,20 @@
     <form @submit.prevent="submitPost" class="post-form">
       <div class="input-group">
         <label for="title">제목</label>
-        <input type="text" v-model="title" id="title" placeholder="제목을 입력하세요." required />
+        <input
+          type="text"
+          v-model="title"
+          id="title"
+          placeholder="제목을 입력하세요."
+          required
+        />
       </div>
       <div class="input-group">
         <label for="content">내용</label>
         <div id="editor"></div>
       </div>
       <div class="inputfile">
-        <input type="file" name="boardfile" id="inputFile">
+        <input type="file" name="boardfile" id="inputFile" />
       </div>
       <button type="submit" class="complete-button">작성 완료</button>
     </form>
@@ -25,24 +32,25 @@
 </template>
 
 <script>
-import Quill from 'quill';
-import "quill/dist/quill.snow.css"
+import axios from "axios";
+import Quill from "quill";
+import "quill/dist/quill.snow.css";
 
 export default {
-  name: 'CreatePost',
+  name: "CreatePost",
   data() {
     return {
-      title: '',
-      content: '',
+      title: "",
+      content: "",
     };
   },
   methods: {
     submitPost() {
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
       if (!currentUser || !currentUser.name) {
-        alert.apply('로그인이 필요합니다.');
-        this.$router.push('/login');
+        alert.apply("로그인이 필요합니다.");
+        this.$router.push("/login");
         return;
       }
 
@@ -54,22 +62,24 @@ export default {
         name: currentUser.name, //작성자 이름
         title: this.title, //글 제목
         content: this.content, //글 내용
-        date: new Date().toISOString(), 
+        date: new Date().toISOString(),
         views: 0, //초기 조회수
       };
 
-      //기존 데이터 불러오기
-      const existingPosts = JSON.parse(localStorage.getItem('posts')) || [];
-
-      existingPosts.push(newPost);
-      localStorage.setItem('posts', JSON.stringify(existingPosts));
-
-      this.$router.push('/list');
+      axios
+        .post('http://localhost:3000/create', newPost)
+        .then(() => {
+          this.$router.push("/list");
+        })
+        .catch((error) => {
+          console.error("게시물 생성 중 오류 발생:", error);
+          alert("게시물 생성에 실패했습니다.");
+        });
     },
 
     logout() {
-      localStorage.removeItem('user');
-      this.$router.push('/login');
+      localStorage.removeItem("user");
+      this.$router.push("/login");
     },
   },
   mounted() {
@@ -90,7 +100,6 @@ export default {
     });
   },
 };
-
 </script>
 
 <style scoped>
@@ -102,14 +111,13 @@ export default {
   padding: 10px;
 }
 
-
 .create-post-container {
   width: 90%;
   margin: 50px auto;
   background-color: #aba6a6;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.1);;
+  box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 .header {
@@ -167,7 +175,8 @@ export default {
   font-weight: bold;
 }
 
-.input-group input, .input-group textarea {
+.input-group input,
+.input-group textarea {
   /* width: 100%; */
   padding: 10px;
   font-size: 16px;
