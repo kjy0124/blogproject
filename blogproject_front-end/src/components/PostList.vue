@@ -129,7 +129,6 @@ export default {
   mounted() {
     this.reloadPosts();
     window.addEventListener("storage", this.syncLoginState);
-    // window.addEventListener("storage", this.reloadPosts); // localStorage 변경 시 글 목록 갱신
   },
 
   beforeUnmount() {

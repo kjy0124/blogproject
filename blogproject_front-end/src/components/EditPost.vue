@@ -74,6 +74,13 @@ export default {
 
     // 수정된 글을 저장하는 메서드
     async submitPost() {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        this.$router.push('/login');
+        return;
+      }
+
       this.content = this.editor.root.innerHTML;
 
       try {
@@ -82,6 +89,11 @@ export default {
           {
             title: this.title,
             content: this.content,
+          },
+          {
+            headers: {
+              'current-user': currentUser.email,
+            },
           }
         );
         console.log(response.data); // 성공 메시지 로그

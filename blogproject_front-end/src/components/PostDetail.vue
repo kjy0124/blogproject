@@ -82,6 +82,13 @@ export default {
 
     // 글 수정 페이지로 이동
     editPost() {
+      const currentUser = localStorage.getItem('currentUser'); //현재 로그인한 사용자 가져오기
+
+      if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        this.$router.push('/login');
+        return;
+      }
       this.$router.push(`/edit/${this.post.id}`);
     },
 
@@ -98,12 +105,28 @@ export default {
     async deletePost() {
       if (confirm("정말 이 글을 삭제하시겠습니까?")) {
         try {
-          await axios.delete(`http://localhost:3000/detail/${this.post.id}`);
+          const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+          const currentUserEmail = storedUser.email;
+          console.log(currentUserEmail);
+          console.log('storedUserEmail: ', storedUser.email);
+          // console.log('작성자 이메일: ', postAuthorEmail, '현재 사용자 이메일: ', currentUserEmail)
+
+          await axios.delete(`http://localhost:3000/detail/${this.post.id}`, {
+            headers: {
+              'current-user': currentUserEmail,
+            },
+          });
           alert("게시물이 삭제되었습니다.");
           this.$router.push("/list"); // 글 목록 페이지로 이동
         } catch (error) {
-          console.error("게시물 삭제 중 오류 발생:", error);
+          console.error("게시물 삭제 중 오류 발생:", error.response?.data || error.message);
           alert("게시물 삭제에 실패했습니다.");
+
+          if (error.response?.status === 403) {
+            alert('삭제 권한이 없습니다.');
+          } else {
+            alert('게시물 삭제에 실패했습니다.');
+          }
         }
       }
     },

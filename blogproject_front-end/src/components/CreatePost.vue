@@ -48,7 +48,7 @@ export default {
     submitPost() {
       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-      if (!currentUser || !currentUser.name) {
+      if (!currentUser || !currentUser.name || !currentUser.email) {
         alert.apply("로그인이 필요합니다.");
         this.$router.push("/login");
         return;
@@ -60,6 +60,7 @@ export default {
       const newPost = {
         id: Date.now(), //고유 ID
         name: currentUser.name, //작성자 이름
+        email: currentUser.email,
         title: this.title, //글 제목
         content: this.content, //글 내용
         date: new Date().toISOString(),
