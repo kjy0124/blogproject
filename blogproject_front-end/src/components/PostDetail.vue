@@ -39,7 +39,7 @@
         <div class="comments-list">
           <div v-for="comment in comments" :key="comment.id" class="comment-item">
             <p>{{ comment.content }}</p>
-            <small>작성자 : {{ comment.username }} | formatDate{{ comment.createdAt }}</small>
+            <small>작성자 : {{ comment.username }} | {{ comment.createdAt }}</small>
             <button v-if="comment.userId === currentUserId" @click="deleteComment(comment.id)">삭제</button>
           </div>
 
@@ -95,7 +95,12 @@ export default {
     async fetchComments() {
       try {
         const response = await axios.get(`http://localhost:3000/comments/${this.$route.params.id}`);
-        this.comments = response.data;
+        this.comments = response.data.map(comment => ({
+          ...this.comment,
+          username: comment.userId,
+          createdAt: this.formatDate(comment.createdAt),
+          content: comment.content
+        }));
       } catch (error) {
         console.error("댓글 불러오기 실패:", error);
       }
@@ -104,19 +109,36 @@ export default {
     async addComment() {
       try {
         const token = localStorage.getItem("token");
+        const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!storedUser || !storedUser.email) {
+          throw new Error('사용자 정보가 없습니다.');
+        }
+
         const response = await axios.post(
-          "http://localhost:3000/comments",
-          { postId: this.$route.params.id, content: this.newComment },
+          `http://localhost:3000/comments/${this.$route.params.id}`,
+          { postId: this.$route.params.id, content: this.newComment, userEmail: storedUser.email },
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         this.comments.push(response.data);
         this.newComment = "";
-
-        this.$router.push('/detail');
       } catch (error) {
-        console.error("댓글 작성 실패:", error);
+        console.error("댓글 작성 실패:", error.response?.data || error.message);
+        alert('댓글 작성에 실패했습니다. 다시 시도해주세요.');
+      }
+    },
+
+    //댓글 삭제
+    async deleteComment(commentId) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`http://localhost:3000/comments/${commentId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.comments = this.comments.filter(comment => comment.id !== commentId);
+      } catch(error) {
+        console.log('댓글 삭제 실패:', error.response?.data || error.message);
       }
     },
 
