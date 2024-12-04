@@ -68,7 +68,9 @@ app.post('/create', (req, res) => {
     if (err) {
       return res.status(500).json({ message: '게시물 생성 실패', error: err });
     }
-    res.status(201).json({ message: '게시물 작성 완료', postId: result.insertId });
+    res
+      .status(201)
+      .json({ message: "게시물 작성 완료", postId: results.insertId });
   });
 });
 
@@ -161,6 +163,54 @@ app.put('/detail/:id', (req, res) => {
   });
 });
 
+
+//댓글작성 API
+app.post("/comments/:postId", (req, res) => {
+  const postId = parseInt(req.params.postId, 10);
+  const { userEmail, content } = req.body;
+
+  if(!userEmail || !content) {
+    return res.status(400).json({ message: "모든 필드를 입력해주세요."});
+  }
+
+  const query = "INSERT INTO comments (postId, userId, content) VALUES (?, ?, ?)";
+  db.query(query, [postId, userEmail, content], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "댓글 생성 실패", error: err });
+    }
+    res.status(201).json({ message: "댓글 작성 완료", commentId: results.insertId });
+  });
+});
+
+//댓글 조회 API
+app.get("/comments/:postId", (req, res) => {
+  const postId = parseInt(req.params.postId, 10);
+
+  const query = "SELECT * FROM comments WHERE postId = ?";
+
+  db.query(query, [postId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "댓글 조회 실패", error: err });
+    }
+    res.status(200).json(results);
+  });
+});
+
+//댓글 삭제 API
+app.delete('/comments/:commentId', (req, res) => {
+  const commentId = parseInt(req.params.commentId, 10);
+
+  const query = 'DELETE FROM comments WHERE id = ?';
+  db.query(query, [commentId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: '댓글 삭제 실패', error: err });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: '댓글이 존재하지 않습니다.'});
+    }
+    res.status(200).json({ message: '댓글 삭제 성공'});
+  })
+})
 // 서버 실행
 app.listen(port, () => {
   console.log(`서버가 http://localhost:${port}에서 실행 중입니다.`);
