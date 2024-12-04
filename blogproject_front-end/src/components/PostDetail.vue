@@ -28,6 +28,23 @@
         <button @click="editPost" class="edit-btn">수정</button>
         <button @click="deletePost" class="delete-btn">삭제</button>
       </div>
+
+      <div class="comments-section">
+        <h3>댓글</h3>
+        <form @submit.prevent="addComment">
+          <textarea v-model="newComment" placeholder="댓글을 작성하시오" required></textarea>
+          <button type="submit">댓글 작성</button>
+        </form>
+
+        <div class="comments-list">
+          <div v-for="comment in comments" :key="comment.id" class="comment-item">
+            <p>{{ comment.content }}</p>
+            <small>작성자 : {{ comment.username }} | formatDate{{ comment.createdAt }}</small>
+            <button v-if="comment.userId === currentUserId" @click="deleteComment(comment.id)">삭제</button>
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -38,6 +55,9 @@ import axios from "axios";
 export default {
   data() {
     return {
+      comments: [],
+      newComment:"",
+      currentUserId: JSON.parse(localStorage.getItem("currentUser"))?.id || null,
       post: {}, // 상세 글 데이터
       isLoggedIn: !!localStorage.getItem("currentUser"),
     };
@@ -45,6 +65,7 @@ export default {
 
   created() {
     this.getPostDetail();
+    this.fetchComments();
   },
   methods: {
     async getPostDetail() {
@@ -69,6 +90,33 @@ export default {
           error.response ? error.response.data : error.message
         );
         this.$router.push("/list");
+      }
+    },
+    async fetchComments() {
+      try {
+        const response = await axios.get(`http://localhost:3000/comments/${this.$route.params.id}`);
+        this.comments = response.data;
+      } catch (error) {
+        console.error("댓글 불러오기 실패:", error);
+      }
+    },
+
+    async addComment() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.post(
+          "http://localhost:3000/comments",
+          { postId: this.$route.params.id, content: this.newComment },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        this.comments.push(response.data);
+        this.newComment = "";
+
+        this.$router.push('/detail');
+      } catch (error) {
+        console.error("댓글 작성 실패:", error);
       }
     },
 
@@ -139,7 +187,11 @@ export default {
       const hours = String(date.getHours()).padStart(2, "0");
       const minutes = String(date.getMinutes()).padStart(2, "0");
       return `${year}-${month}-${day} ${hours}:${minutes}`;
+      
     },
+  },
+  mounted() {
+    this.fetchComments();
   },
 };
 </script>
@@ -245,5 +297,29 @@ div {
 
 .delete-btn:hover {
   background-color: #e03e3e;
+}
+.comments-section {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.comments-list {
+  margin-top: 10px;
+}
+
+.comment-item {
+  margin-bottom: 10px;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
 }
 </style>
