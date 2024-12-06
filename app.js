@@ -78,7 +78,7 @@ app.post("/create", (req, res) => {
 });
 
 app.get("/list", (req, res) => {
-  const query =
+  const query = 
     "SELECT id, name, title, content, views, created_at FROM noticeBoard ORDER BY views DESC";
   db.query(query, (err, results) => {
     if (err) {
@@ -96,7 +96,12 @@ app.get("/detail/:id", (req, res) => {
   }
 
   // 데이터베이스 쿼리
-  const query = "SELECT * FROM noticeBoard WHERE id = ?";
+  const query = `
+    SELECT n.*, 
+          (SELECT COUNT(*) FROM comments WHERE comments.postId = n.id) AS commentCount
+    FROM noticeBoard n
+    WHERE n.id = ?
+  `;
   db.query(query, [postId], (err, results) => {
     if (err) {
       console.error("DB 쿼리 오류:", err);
@@ -222,22 +227,33 @@ app.put("/detail/:id", (req, res) => {
   });
 });
 
-
 //댓글작성 API
 app.post("/comments/:postId", (req, res) => {
   const postId = parseInt(req.params.postId, 10);
   const { userEmail, content } = req.body;
 
-  if(!userEmail || !content) {
-    return res.status(400).json({ message: "모든 필드를 입력해주세요."});
+  if (!userEmail || !content) {
+    return res.status(400).json({ message: "모든 필드를 입력해주세요." });
   }
 
-  const query = "INSERT INTO comments (postId, userId, content) VALUES (?, ?, ?)";
+  const query =
+    "INSERT INTO comments (postId, userId, content) VALUES (?, ?, ?)";
   db.query(query, [postId, userEmail, content], (err, results) => {
     if (err) {
+      console.error("댓글 작성 실패:", err);
       return res.status(500).json({ message: "댓글 생성 실패", error: err });
     }
-    res.status(201).json({ message: "댓글 작성 완료", commentId: results.insertId });
+
+    // 작성된 댓글 데이터를 반환
+    const selectQuery =
+      "SELECT id, postId, userId AS username, content, createdAt FROM comments WHERE id = ?";
+    db.query(selectQuery, [results.insertId], (err, commentResults) => {
+      if (err) {
+        console.error("댓글 조회 실패:", err);
+        return res.status(500).json({ message: "댓글 조회 실패", error: err });
+      }
+      res.status(201).json(commentResults[0]); // 새로 생성된 댓글 반환
+    });
   });
 });
 
@@ -256,20 +272,50 @@ app.get("/comments/:postId", (req, res) => {
 });
 
 //댓글 삭제 API
-app.delete('/comments/:commentId', (req, res) => {
+app.delete("/comments/:commentId", (req, res) => {
   const commentId = parseInt(req.params.commentId, 10);
+  const currentUserEmail = req.headers["current-user"];
+  console.log("current-user 헤더 값: ", currentUserEmail);
 
-  const query = 'DELETE FROM comments WHERE id = ?';
-  db.query(query, [commentId], (err, results) => {
+  if (!currentUserEmail) {
+    return res.status(401).json({ message: "로그인이 필요합니다." });
+  }
+
+  // 댓글 작성자 확인
+  const selectQuery = "SELECT userId FROM comments WHERE id = ?";
+  db.query(selectQuery, [commentId], (err, results) => {
     if (err) {
-      return res.status(500).json({ message: '댓글 삭제 실패', error: err });
+      return res.status(500).json({ message: "댓글 조회 실패", error: err });
     }
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ message: '댓글이 존재하지 않습니다.'});
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "댓글이 존재하지 않습니다." });
     }
-    res.status(200).json({ message: '댓글 삭제 성공'});
-  })
-})
+
+    const commentAuthorEmail = results[0].userId;
+
+    //현재 사용자와 댓글 작성자가 다르면 권한 없음
+    if (
+      commentAuthorEmail.trim().toLowerCase() !==
+      currentUserEmail.trim().toLowerCase()
+    ) {
+      return res.status(403).json({ message: "삭제 권한이 없습니다." });
+    }
+
+    // 작성자가 동일하면 댓글 삭제
+
+    const deleteQuery = "DELETE FROM comments WHERE id = ?";
+    db.query(deleteQuery, [commentId], (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "댓글 삭제 실패", error: err });
+      }
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ message: "댓글이 존재하지 않습니다." });
+      }
+      res.status(200).json({ message: "댓글 삭제 성공" });
+    });
+  });
+});
 // 서버 실행
 app.listen(port, () => {
   console.log(`서버가 http://localhost:${port}에서 실행 중입니다.`);
