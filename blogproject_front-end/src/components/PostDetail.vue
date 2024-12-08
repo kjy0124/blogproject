@@ -34,34 +34,34 @@
       <div class="comments-section">
         <h3>댓글 {{ post.commentCount }}</h3>
         <form @submit.prevent="addComment">
-          <textarea
-            v-model="newComment"
-            placeholder="댓글을 작성하시오"
-            required
-          ></textarea>
+          <textarea v-model="newComment" placeholder="댓글을 작성하시오" required></textarea>
           <button type="submit">댓글 작성</button>
         </form>
 
         <div class="comments-list">
-          <div
-            v-for="comment in comments"
-            :key="comment.id"
-            class="comment-item"
-          >
+          <div v-for="comment in comments" :key="comment.id" class="comment-item">
             <p>{{ comment.content }}</p>
 
             <div class="comment-footer">
-              <small
-                >작성자 : {{ comment.username }} |
-                {{ comment.createdAt }}</small
-              >
+              <small>작성자 : {{ comment.username }} |
+                {{ comment.createdAt }}</small>
+
+              <button @click="toggleLike(comment.id)" class="like-button">
+                <span>{{ comment.isLiked ? '❤️' : '🤍' }}</span> {{ comment.likesCount }}
+              </button>
+
+              <!-- 삭제 버튼 -->
+              <button v-if="comment.userId === currentUserId" @click="deleteComment(comment.id)" class="delete-btn">
+                삭제
+              </button>
               <!-- <button
                 v-if="comment.userId === currentUserId"
                 @click="deleteComment(comment.id)"
               >
                 삭제
               </button> -->
-              <img v-if="comment.userId === currentUserId" src="@/assets/delete-comment.jpg" alt="삭제" class="delete-icon" @click="deleteComment(comment.id)">
+              <img v-if="comment.userId === currentUserId" src="@/assets/delete-comment.jpg" alt="삭제"
+                class="delete-icon" @click="deleteComment(comment.id)">
             </div>
           </div>
         </div>
@@ -72,6 +72,8 @@
 
 <script>
 import axios from "axios";
+
+axios.defaults.baseURL = "http://localhost:3000";
 
 export default {
   data() {
@@ -92,6 +94,47 @@ export default {
   },
 
   methods: {
+    async toggleLike(commentId) {
+  const comment = this.comments.find((c) => c.id === commentId);
+  if (!comment) return;
+
+  if (comment.isLiked) {
+    alert("이미 좋아요를 눌렀습니다.");
+    return;
+  }
+
+  try {
+    await this.addLike(commentId);
+    comment.isLiked = true;
+    comment.likesCount += 1;
+  } catch (error) {
+    console.error("좋아요 처리 중 오류:", error.response?.data || error.message);
+  }
+},
+
+    async addLike(commentId) {
+      try {
+        const response = await axios.post(`/api/comments/${commentId}/likes`, { userId: this.currentUserId });
+
+        // 이미 좋아요를 눌렀다면 메시지를 표시하지 않고 종료
+        if (response.data.message === "이미 좋아요를 눌렀습니다.") {
+          console.log("이미 좋아요를 눌렀습니다.");
+          return;
+        }
+      } catch (error) {
+        //console.error("좋아요 추가 실패:", error.response?.data || error.message);
+        //alert(error.response?.data?.message || "좋아요 추가에 실패했습니다.");
+      }
+    },
+
+    async removeLike(commentId) {
+      try {
+        await axios.delete(`/api/comments/${commentId}/likes`, { data: { userId: this.currentUserId } });
+      } catch (error) {
+        console.error("좋아요 취소 실패:", error.response?.data || error.message);
+        alert(error.response?.data?.message || "좋아요 취소에 실패했습니다.");
+      }
+    },
     async getPostDetail() {
       const postId = parseInt(this.$route.params.id);
       if (isNaN(postId)) {
@@ -116,27 +159,50 @@ export default {
       }
     },
     async fetchComments() {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/comments/${this.$route.params.id}`
-        );
-        this.comments = response.data.map((comment) => ({
-          //...this.comment,
+  try {
+    // 댓글 데이터 가져오기
+    const response = await axios.get(
+      `http://localhost:3000/comments/${this.$route.params.id}`
+    );
+
+    // 댓글 데이터를 순회하며 좋아요 상태와 카운트를 추가
+    this.comments = await Promise.all(
+      response.data.map(async (comment) => {
+        let isLiked = false;
+        let likesCount = 0;
+
+        try {
+          // 좋아요 상태와 카운트 가져오기
+          const likeResponse = await axios.get(`http://localhost:3000/api/comments/${comment.id}/likes`, {
+            params: { userId: this.currentUserId },
+          });
+          isLiked = likeResponse.data.isLiked;
+          likesCount = likeResponse.data.likesCount;
+        } catch (error) {
+          console.error(`좋아요 데이터 가져오기 실패 (댓글 ID: ${comment.id}):`, error.message);
+        }
+
+        return {
           id: comment.id,
           userId: comment.userId,
           username: comment.userId,
           createdAt: this.formatDate(comment.createdAt),
           content: comment.content,
-        }));
-      } catch (error) {
-        console.error("댓글 불러오기 실패:", error);
-      }
-    },
+          isLiked,
+          likesCount,
+        };
+      })
+    );
+  } catch (error) {
+    console.error("댓글 불러오기 실패:", error.response?.data || error.message);
+  }
+},
 
     async addComment() {
       try {
         const token = localStorage.getItem("token");
         const storedUser = JSON.parse(localStorage.getItem("currentUser"));
+
         if (!storedUser || !storedUser.email) {
           throw new Error("사용자 정보가 없습니다.");
         }
@@ -148,18 +214,22 @@ export default {
             content: this.newComment,
             userEmail: storedUser.email,
           },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+
+        // 서버에서 반환된 댓글만 추가
         this.comments.push({
           id: response.data.id,
           userId: response.data.username,
           username: response.data.username,
           createdAt: this.formatDate(response.data.createdAt),
           content: response.data.content,
+          isLiked: false,
+          likesCount: 0,
         });
-        this.newComment = '';
+
+        // 입력 필드 초기화
+        this.newComment = "";
       } catch (error) {
         console.error("댓글 작성 실패:", error.response?.data || error.message);
         alert("댓글 작성에 실패했습니다. 다시 시도해주세요.");
@@ -288,6 +358,7 @@ export default {
   justify-content: center;
   margin-top: 50px;
 }
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -321,8 +392,10 @@ export default {
 
 .post-detail {
   width: 80%;
-  max-width: 900px; /* 최대 너비 설정 */
-  background-color: #f9f9f9; /* 흰색 배경 */
+  max-width: 900px;
+  /* 최대 너비 설정 */
+  background-color: #f9f9f9;
+  /* 흰색 배경 */
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -346,7 +419,8 @@ div {
 
 /* 회색 컨테이너 */
 .container {
-  background-color: #aba6a6; /* 회색 배경 */
+  background-color: #aba6a6;
+  /* 회색 배경 */
   padding: 20px;
   border-radius: 10px;
 }
@@ -384,6 +458,7 @@ div {
 .delete-btn:hover {
   background-color: #e03e3e;
 }
+
 .comments-section {
   margin-top: 20px;
   padding: 10px;
