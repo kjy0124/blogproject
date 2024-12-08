@@ -226,6 +226,87 @@ app.put("/detail/:id", (req, res) => {
     });
   });
 });
+//좋아요 추가 API
+app.post("/api/comments/:id/likes", (req, res) => {
+  const commentId = parseInt(req.params.id, 10);
+  const userId = req.body.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "사용자 정보가 없습니다." });
+  }
+
+  const checkQuery = "SELECT * FROM likes WHERE user_id = ? AND comment_id = ?";
+  db.query(checkQuery, [userId, commentId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "좋아요 확인 실패", error: err });
+    }
+
+    if (results.length > 0) {
+      return res.status(200).json({ message: "이미 좋아요를 눌렀습니다." }); // 200으로 처리
+    }
+
+    const insertQuery = "INSERT INTO likes (user_id, comment_id) VALUES (?, ?)";
+    db.query(insertQuery, [userId, commentId], (err) => {
+      if (err) {
+        return res.status(500).json({ message: "좋아요 추가 실패", error: err });
+      }
+      res.status(200).json({ message: "좋아요 추가 성공" });
+    });
+  });
+});
+
+//좋아요 제거 API
+app.delete("/api/comments/:id/likes", (req, res) => {
+  const commentId = parseInt(req.params.id, 10);
+  const userId = req.body.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "사용자 정보가 없습니다." });
+  }
+
+  const deleteQuery = "DELETE FROM likes WHERE user_id = ? AND comment_id = ?";
+  db.query(deleteQuery, [userId, commentId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "좋아요 삭제 실패", error: err });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "좋아요 기록이 없습니다." });
+    }
+    res.status(200).json({ message: "좋아요 취소 성공" });
+  });
+});
+
+//좋아요 조회 API
+app.get("/api/comments/:id/likes", async (req, res) => {
+  const commentId = parseInt(req.params.id, 10);
+  const userId = req.query.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "사용자 정보가 없습니다." });
+  }
+
+  try {
+    // 좋아요 개수 조회
+    const [likeCountRows] = await db.promise().query(
+      "SELECT COUNT(*) AS likesCount FROM likes WHERE comment_id = ?",
+      [commentId]
+    );
+
+    // 사용자의 좋아요 여부 확인
+    const [userLikeRows] = await db.promise().query(
+      "SELECT * FROM likes WHERE user_id = ? AND comment_id = ?",
+      [userId, commentId]
+    );
+
+    res.json({
+      likesCount: likeCountRows[0].likesCount || 0,
+      isLiked: userLikeRows.length > 0,
+    });
+  } catch (error) {
+    console.error("좋아요 상태 조회 실패:", error);
+    res.status(500).json({ message: "서버 오류" });
+  }
+});
 
 //댓글작성 API
 app.post("/comments/:postId", (req, res) => {
@@ -236,8 +317,7 @@ app.post("/comments/:postId", (req, res) => {
     return res.status(400).json({ message: "모든 필드를 입력해주세요." });
   }
 
-  const query =
-    "INSERT INTO comments (postId, userId, content) VALUES (?, ?, ?)";
+  const query = "INSERT INTO comments (postId, userId, content) VALUES (?, ?, ?)";
   db.query(query, [postId, userEmail, content], (err, results) => {
     if (err) {
       console.error("댓글 작성 실패:", err);
@@ -245,8 +325,11 @@ app.post("/comments/:postId", (req, res) => {
     }
 
     // 작성된 댓글 데이터를 반환
-    const selectQuery =
-      "SELECT id, postId, userId AS username, content, createdAt FROM comments WHERE id = ?";
+    const selectQuery = `
+      SELECT id, postId, userId AS username, content, createdAt 
+      FROM comments 
+      WHERE id = ?
+    `;
     db.query(selectQuery, [results.insertId], (err, commentResults) => {
       if (err) {
         console.error("댓글 조회 실패:", err);
@@ -261,12 +344,22 @@ app.post("/comments/:postId", (req, res) => {
 app.get("/comments/:postId", (req, res) => {
   const postId = parseInt(req.params.postId, 10);
 
-  const query = "SELECT * FROM comments WHERE postId = ?";
+  if (isNaN(postId)) {
+    return res.status(400).json({ message: "잘못된 게시물 ID입니다." });
+  }
+
+  const query = `
+    SELECT id, postId, userId, content, createdAt 
+    FROM comments 
+    WHERE postId = ?
+  `;
 
   db.query(query, [postId], (err, results) => {
     if (err) {
+      console.error("댓글 조회 실패:", err);
       return res.status(500).json({ message: "댓글 조회 실패", error: err });
     }
+
     res.status(200).json(results);
   });
 });
