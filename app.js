@@ -73,7 +73,7 @@ app.post("/create", (req, res) => {
     }
     res
       .status(201)
-      .json({ message: "게시물 작성 완료", postId: results.insertId });
+      .json({ message: "게시물 작성 완료", postId: result.insertId });
   });
 });
 
@@ -228,31 +228,65 @@ app.put("/detail/:id", (req, res) => {
 });
 //좋아요 추가 API
 app.post("/api/comments/:id/likes", (req, res) => {
-  const commentId = parseInt(req.params.id, 10);
-  const userId = req.body.userId;
+  const commentId = parseInt(req.params.id, 10); // 댓글 ID 사용
+  const userEmail = req.body.userId; // 이메일 사용
 
-  if (!userId) {
+  if (!userEmail) {
     return res.status(400).json({ message: "사용자 정보가 없습니다." });
   }
 
-  const checkQuery = "SELECT * FROM likes WHERE user_id = ? AND comment_id = ?";
-  db.query(checkQuery, [userId, commentId], (err, results) => {
+  const checkQuery = "SELECT * FROM likes WHERE user_id = ? AND post_id = ?";
+  db.query(checkQuery, [userEmail, commentId], (err, results) => {
     if (err) {
+      console.error("좋아요 확인 실패:", err);
       return res.status(500).json({ message: "좋아요 확인 실패", error: err });
     }
 
     if (results.length > 0) {
-      return res.status(200).json({ message: "이미 좋아요를 눌렀습니다." }); // 200으로 처리
+      return res.status(200).json({ message: "이미 좋아요를 눌렀습니다." });
     }
 
-    const insertQuery = "INSERT INTO likes (user_id, comment_id) VALUES (?, ?)";
-    db.query(insertQuery, [userId, commentId], (err) => {
+    const insertQuery = "INSERT INTO likes (user_id, post_id) VALUES (?, ?)";
+    db.query(insertQuery, [userEmail, commentId], (err) => {
       if (err) {
+        console.error("좋아요 추가 실패:", err);
         return res.status(500).json({ message: "좋아요 추가 실패", error: err });
       }
       res.status(200).json({ message: "좋아요 추가 성공" });
     });
   });
+});
+
+//좋아요 조회 API
+app.get("/api/comments/:id/likes", async (req, res) => {
+  const commentId = parseInt(req.params.id, 10); // 댓글 ID 사용
+  const userEmail = req.query.userId; // 이메일 사용
+
+  if (!userEmail) {
+    return res.status(400).json({ message: "사용자 정보가 없습니다." });
+  }
+
+  try {
+    // 좋아요 개수 조회
+    const [likeCountRows] = await db.promise().query(
+      "SELECT COUNT(*) AS likesCount FROM likes WHERE post_id = ?",
+      [commentId]
+    );
+
+    // 사용자의 좋아요 여부 확인
+    const [userLikeRows] = await db.promise().query(
+      "SELECT * FROM likes WHERE user_id = ? AND post_id = ?",
+      [userEmail, commentId]
+    );
+
+    res.json({
+      likesCount: likeCountRows[0].likesCount || 0,
+      isLiked: userLikeRows.length > 0,
+    });
+  } catch (error) {
+    console.error("좋아요 상태 조회 실패:", error);
+    res.status(500).json({ message: "서버 오류" });
+  }
 });
 
 //좋아요 제거 API
@@ -264,7 +298,7 @@ app.delete("/api/comments/:id/likes", (req, res) => {
     return res.status(400).json({ message: "사용자 정보가 없습니다." });
   }
 
-  const deleteQuery = "DELETE FROM likes WHERE user_id = ? AND comment_id = ?";
+  const deleteQuery = "DELETE FROM likes WHERE user_id = ? AND post_id = ?";
   db.query(deleteQuery, [userId, commentId], (err, results) => {
     if (err) {
       return res.status(500).json({ message: "좋아요 삭제 실패", error: err });
@@ -274,38 +308,6 @@ app.delete("/api/comments/:id/likes", (req, res) => {
     }
     res.status(200).json({ message: "좋아요 취소 성공" });
   });
-});
-
-//좋아요 조회 API
-app.get("/api/comments/:id/likes", async (req, res) => {
-  const commentId = parseInt(req.params.id, 10);
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ message: "사용자 정보가 없습니다." });
-  }
-
-  try {
-    // 좋아요 개수 조회
-    const [likeCountRows] = await db.promise().query(
-      "SELECT COUNT(*) AS likesCount FROM likes WHERE comment_id = ?",
-      [commentId]
-    );
-
-    // 사용자의 좋아요 여부 확인
-    const [userLikeRows] = await db.promise().query(
-      "SELECT * FROM likes WHERE user_id = ? AND comment_id = ?",
-      [userId, commentId]
-    );
-
-    res.json({
-      likesCount: likeCountRows[0].likesCount || 0,
-      isLiked: userLikeRows.length > 0,
-    });
-  } catch (error) {
-    console.error("좋아요 상태 조회 실패:", error);
-    res.status(500).json({ message: "서버 오류" });
-  }
 });
 
 //댓글작성 API
