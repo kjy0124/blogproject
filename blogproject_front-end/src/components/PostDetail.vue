@@ -76,6 +76,9 @@ import axios from "axios";
 axios.defaults.baseURL = "http://localhost:3000";
 
 export default {
+  props:{
+    postId: {type:Number, required: true},
+  },
   data() {
     return {
       comments: [],
@@ -114,16 +117,17 @@ export default {
 
     async addLike(commentId) {
       try {
-        const response = await axios.post(`/api/comments/${commentId}/likes`, { userId: this.currentUserId });
-
+    const response = await axios.post(`/api/comments/${commentId}/likes`, {
+      userId: this.currentUserId, // 이메일 전달
+    });
         // 이미 좋아요를 눌렀다면 메시지를 표시하지 않고 종료
         if (response.data.message === "이미 좋아요를 눌렀습니다.") {
           console.log("이미 좋아요를 눌렀습니다.");
           return;
         }
       } catch (error) {
-        //console.error("좋아요 추가 실패:", error.response?.data || error.message);
-        //alert(error.response?.data?.message || "좋아요 추가에 실패했습니다.");
+        console.error("좋아요 추가 실패:", error.response?.data || error.message);
+        alert(error.response?.data?.message || "좋아요 추가에 실패했습니다.");
       }
     },
 
@@ -160,81 +164,74 @@ export default {
     },
     async fetchComments() {
   try {
-    // 댓글 데이터 가져오기
     const response = await axios.get(
       `http://localhost:3000/comments/${this.$route.params.id}`
     );
 
-    // 댓글 데이터를 순회하며 좋아요 상태와 카운트를 추가
-    this.comments = await Promise.all(
-      response.data.map(async (comment) => {
-        let isLiked = false;
-        let likesCount = 0;
+    // 댓글 목록 초기화 후 서버 데이터 추가
+    this.comments = response.data.map((comment) => ({
+      id: comment.id,
+      userId: comment.userId,
+      username: comment.userId,
+      createdAt: this.formatDate(comment.createdAt),
+      content: comment.content,
+      isLiked: false, // 기본값 설정
+      likesCount: 0, // 기본값 설정
+    }));
 
-        try {
-          // 좋아요 상태와 카운트 가져오기
-          const likeResponse = await axios.get(`http://localhost:3000/api/comments/${comment.id}/likes`, {
-            params: { userId: this.currentUserId },
-          });
-          isLiked = likeResponse.data.isLiked;
-          likesCount = likeResponse.data.likesCount;
-        } catch (error) {
-          console.error(`좋아요 데이터 가져오기 실패 (댓글 ID: ${comment.id}):`, error.message);
-        }
-
-        return {
-          id: comment.id,
-          userId: comment.userId,
-          username: comment.userId,
-          createdAt: this.formatDate(comment.createdAt),
-          content: comment.content,
-          isLiked,
-          likesCount,
-        };
-      })
-    );
+    // 좋아요 상태와 카운트 추가
+    for (const comment of this.comments) {
+      try {
+        const likeResponse = await axios.get(`/api/comments/${comment.id}/likes`, {
+          params: { userId: this.currentUserId },
+        });
+        comment.isLiked = likeResponse.data.isLiked;
+        comment.likesCount = likeResponse.data.likesCount;
+      } catch (error) {
+        console.error(`좋아요 데이터 가져오기 실패 (댓글 ID: ${comment.id}):`, error.message);
+      }
+    }
   } catch (error) {
     console.error("댓글 불러오기 실패:", error.response?.data || error.message);
   }
 },
 
-    async addComment() {
-      try {
-        const token = localStorage.getItem("token");
-        const storedUser = JSON.parse(localStorage.getItem("currentUser"));
+async addComment() {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem("currentUser"));
 
-        if (!storedUser || !storedUser.email) {
-          throw new Error("사용자 정보가 없습니다.");
-        }
+    if (!storedUser || !storedUser.email) {
+      throw new Error("사용자 정보가 없습니다.");
+    }
 
-        const response = await axios.post(
-          `http://localhost:3000/comments/${this.$route.params.id}`,
-          {
-            postId: this.$route.params.id,
-            content: this.newComment,
-            userEmail: storedUser.email,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        // 서버에서 반환된 댓글만 추가
-        this.comments.push({
-          id: response.data.id,
-          userId: response.data.username,
-          username: response.data.username,
-          createdAt: this.formatDate(response.data.createdAt),
-          content: response.data.content,
-          isLiked: false,
-          likesCount: 0,
-        });
-
-        // 입력 필드 초기화
-        this.newComment = "";
-      } catch (error) {
-        console.error("댓글 작성 실패:", error.response?.data || error.message);
-        alert("댓글 작성에 실패했습니다. 다시 시도해주세요.");
+    // 서버에 댓글 작성 요청
+    const response = await axios.post(
+      `http://localhost:3000/comments/${this.$route.params.id}`,
+      {
+        postId: this.$route.params.id,
+        content: this.newComment,
+        userEmail: storedUser.email,
       }
-    },
+    );
+
+    // 서버에서 반환된 댓글 데이터 추가
+    this.comments.push({
+      id: response.data.id,
+      userId: response.data.username,
+      username: response.data.username,
+      createdAt: this.formatDate(response.data.createdAt),
+      content: response.data.content,
+      isLiked: false,
+      likesCount: 0,
+    });
+
+    // 입력 필드 초기화
+    this.newComment = "";
+  } catch (error) {
+    console.error("댓글 작성 실패:", error.response?.data || error.message);
+    alert("댓글 작성에 실패했습니다. 다시 시도해주세요.");
+  }
+},
 
     //댓글 삭제
     async deleteComment(commentId) {
