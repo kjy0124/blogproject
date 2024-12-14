@@ -78,9 +78,18 @@ app.post("/create", (req, res) => {
 });
 
 app.get("/list", (req, res) => {
-  const query = 
-    "SELECT id, name, title, content, views, created_at FROM noticeBoard ORDER BY views DESC";
-  db.query(query, (err, results) => {
+  const { myPostsOnly, currentUserEmail } = req.query;
+  let query = "SELECT id, name, title, content, views, created_at FROM noticeBoard";
+  const params = [];
+
+  if (myPostsOnly === "true" && currentUserEmail) {
+    query += " WHERE email = ? ";
+    params.push(currentUserEmail.trim());
+  }
+
+  query += " ORDER BY views DESC ";
+
+  db.query(query, params, (err, results) => {
     if (err) {
       return res.status(500).json({ message: "게시물 조회 실패", error: err });
     }
