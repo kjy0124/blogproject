@@ -13,6 +13,17 @@
 
     <div class="post-list-container">
       <h2 class="post-list-title">글 목록</h2>
+      <div class="myPosts">
+        <label>
+          <input
+            type="checkbox"
+            v-model="filterMyPosts"
+            @change="reloadPosts"
+          />
+          내가 쓴 글
+        </label>
+      </div>
+      <!-- 글목록 -->
       <div class="post-list">
         <div v-for="post in paginatedPosts" :key="post.id" class="post-item">
           <span class="author">글쓴이: {{ post.name }}</span>
@@ -24,6 +35,7 @@
         </div>
       </div>
 
+      <!-- 페이지 -->
       <div class="pagination">
         <button
           v-for="page in totalPages"
@@ -35,6 +47,8 @@
           {{ page }}
         </button>
       </div>
+
+      <!-- 글작성 버튼 -->
       <button type="button" @click="createPost" class="create-post-btn">
         글작성
       </button>
@@ -53,6 +67,7 @@ export default {
       currentPage: 1, // 현재 페이지
       postPerPage: 5, // 한 페이지에 보여줄 글 개수
       isLoggedIn: !!localStorage.getItem("currentUser"), // 로그인 상태 확인
+      filterMyPosts: false,
     };
   },
 
@@ -73,6 +88,30 @@ export default {
   },
 
   methods: {
+    async reloadPosts() {
+      try {
+        const currentUserData = localStorage.getItem("currentUser");
+        const currentUser = currentUserData
+          ? JSON.parse(currentUserData).email
+          : null;
+
+        const response = await axios.get("http://localhost:3000/list", {
+          params: {
+            myPostsOnly: this.filterMyPosts ? "true" : "false",
+            currentUserEmail: currentUser,
+          },
+        });
+
+        this.posts = response.data.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+        //2번째 페이지에서 내가 쓴 글 체크박스 클릭 시 정상적으로 표시되도록 페이치를 첫 번째 페이지로 초기화
+        this.currentPage = 1;
+        
+      } catch (error) {
+        console.error("게시물 불러오기 중 오류 발생:", error);
+      }
+    },
     createPost() {
       this.$router.push("/create");
     },
@@ -113,17 +152,17 @@ export default {
     },
 
     // 글 목록을 다시 불러오는 메서드
-    async reloadPosts() {
-      try {
-        const response = await axios.get(`http://localhost:3000/list`);
-        this.posts = response.data.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-      } catch (error) {
-        console.error("게시물 불러오기 중 오류 발생:", error);
-        alert("게시물을 불러오는 데 실패했습니다.");
-      }
-    },
+    // async reloadPosts() {
+    //   try {
+    //     const response = await axios.get(`http://localhost:3000/list`);
+    //     this.posts = response.data.sort(
+    //       (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    //     );
+    //   } catch (error) {
+    //     console.error("게시물 불러오기 중 오류 발생:", error);
+    //     alert("게시물을 불러오는 데 실패했습니다.");
+    //   }
+    // },
   },
 
   mounted() {
@@ -132,7 +171,7 @@ export default {
   },
 
   beforeUnmount() {
-    window.removeEventListener("storage", this.syncLoginState);
+    // window.removeEventListener("storage", this.syncLoginState);
     window.removeEventListener("storage", this.reloadPosts); // 이벤트 리스너 제거
   },
 };
@@ -142,14 +181,14 @@ export default {
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 60vh;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 0;
   padding: 10px;
 }
 
@@ -166,14 +205,18 @@ export default {
 }
 
 .post-list-container {
+  top: 5%;
   width: 90%;
   margin: 0 auto;
   padding: 20px;
   background-color: #aba6a6;
   border-radius: 10px;
   display: flex;
-  flex-direction: column;
   height: 500px;
+  flex-direction: column;
+  height: 530px;
+  position: absolute;
+  top: 10%;
 }
 
 .logout-button {
@@ -245,7 +288,10 @@ export default {
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
-  align-self: flex-end;
+  /* align-self: flex-end; */
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
 }
 
 .create-post-btn:hover {
@@ -256,8 +302,11 @@ export default {
 .pagination {
   display: flex;
   justify-content: center;
-  margin: 10px 0;
   gap: 5px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .pagination-btn {
@@ -277,5 +326,9 @@ export default {
 .pagination-btn:hover {
   background-color: #0056b3;
   color: white;
+}
+
+.myPosts {
+  margin-bottom: 20px;
 }
 </style>
