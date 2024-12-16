@@ -54,14 +54,8 @@
               <button v-if="comment.userId === currentUserId" @click="deleteComment(comment.id)" class="delete-btn">
                 삭제
               </button>
-              <!-- <button
-                v-if="comment.userId === currentUserId"
-                @click="deleteComment(comment.id)"
-              >
-                삭제
-              </button> -->
-              <img v-if="comment.userId === currentUserId" src="@/assets/delete-comment.jpg" alt="삭제"
-                class="delete-icon" @click="deleteComment(comment.id)">
+              <!-- <img v-if="comment.userId === currentUserId" src="@/assets/delete-comment.jpg" alt="삭제"
+                class="delete-icon" @click="deleteComment(comment.id)"> -->
             </div>
           </div>
         </div>
@@ -77,8 +71,10 @@ axios.defaults.baseURL = "http://localhost:3000";
 
 export default {
   props:{
-    postId: {type:Number, required: true},
+    postId: {type: [String, Number], required: true},
+    id: { type: [String, Number], required: true }
   },
+
   data() {
     return {
       comments: [],
@@ -98,22 +94,25 @@ export default {
 
   methods: {
     async toggleLike(commentId) {
-  const comment = this.comments.find((c) => c.id === commentId);
-  if (!comment) return;
+    const comment = this.comments.find((c) => c.id === commentId);
+    if (!comment) return;
 
-  if (comment.isLiked) {
-    alert("이미 좋아요를 눌렀습니다.");
-    return;
-  }
+    try {
+      const response = await axios.post(`/api/comments/${commentId}/likes`, {
+        userId: this.currentUserId,
+      });
 
-  try {
-    await this.addLike(commentId);
-    comment.isLiked = true;
-    comment.likesCount += 1;
-  } catch (error) {
-    console.error("좋아요 처리 중 오류:", error.response?.data || error.message);
-  }
-},
+      if (response.data.message.includes("추가")) {
+        comment.isLiked = true;
+        comment.likesCount += 1;
+      } else if (response.data.message.includes("취소")) {
+        comment.isLiked = false;
+        comment.likesCount -= 1;
+      }
+    } catch (error) {
+      console.error("좋아요 처리 중 오류:", error.response?.data || error.message);
+    }
+  },
 
     async addLike(commentId) {
       try {
@@ -502,39 +501,26 @@ div {
   background-color: #d9363e;
 }
 
-/* .comment-item {
-  margin-bottom: 10px; 
-  padding: 5px;
-  border-bottom: 1px solid #ddd;
-
-  justify-content: space-between;
-  align-items: center;
-  display: flex;
-}
-
-.comment-item small {
-  margin-right: auto;
-  color: #666
-}
-
-.comment-item button {
-  background-color: #ff4d4f;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.comment-item button:hover {
-  background-color: #d9363e;
-} */
-
 textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 5px;
   resize: none;
+}
+.comment-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.comment-footer .like-button {
+  margin-left: auto; /* 좋아요 버튼을 오른쪽 끝으로 */
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
 }
 </style>
