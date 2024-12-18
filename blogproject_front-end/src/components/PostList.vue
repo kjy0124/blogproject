@@ -10,6 +10,11 @@
       </button>
       <button v-else class="logout-button" @click="logout">로그아웃</button>
     </header>
+    <!-- 검색 기능 -->
+    <div class="search-container">
+      <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요" class="search-input" />
+      <button @click="searchPosts" class="search-button">검색</button>
+    </div>
     <div class="post-list-container">
       <h2 class="post-list-title">글 목록</h2>
       
@@ -69,6 +74,7 @@ export default {
       isLoggedIn: !!localStorage.getItem("currentUser"),
       filterMyPosts: false,
       searchKeyword: "",
+      searchType: "title",
     };
   },
 
@@ -121,12 +127,14 @@ export default {
 
       try {
         const response = await axios.get("http://localhost:3000/api/search", {
-          params: { keyword: this.searchKeyword },
+          params: { 
+            type: this.searchType,//검색 타입(제목 또는 작성자)
+            keyword: this.searchKeyword.trim(), },
         });
         this.posts = response.data; // 검색 결과를 posts에 저장
         this.currentPage = 1; // 검색 후 첫 페이지로 초기화
       } catch (error) {
-        console.error("검색 실패:", error.response?.data || error.message);
+        console.error("검색 실패:", error.response?.data?.message || error.message);
         alert("검색 중 오류가 발생했습니다.");
       }
     },
