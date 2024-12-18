@@ -51,11 +51,11 @@
               </button>
 
               <!-- 삭제 버튼 -->
-              <button v-if="comment.userId === currentUserId" @click="deleteComment(comment.id)" class="delete-btn">
+              <!-- <button v-if="comment.userId === currentUserId" @click="deleteComment(comment.id)" class="delete-btn">
                 삭제
-              </button>
-              <!-- <img v-if="comment.userId === currentUserId" src="@/assets/delete-comment.jpg" alt="삭제"
-                class="delete-icon" @click="deleteComment(comment.id)"> -->
+              </button> -->
+              <img v-if="comment.userId === currentUserId" src="@/assets/delete-comment.jpg" alt="삭제"
+                class="delete-icon" @click="deleteComment(comment.id)">
             </div>
           </div>
         </div>
@@ -339,15 +339,7 @@ async addComment() {
 </script>
 
 <style scoped>
-.delete-icon {
-  width: 15px;
-  height: 15px;
-  cursor: pointer;
-}
 
-.delete-icon {
-  opacity: 0.8;
-}
 
 .container {
   display: flex;
@@ -486,20 +478,23 @@ div {
   color: #666;
 }
 
-/* 삭제 버튼 스타일 */
-.comment-footer .delete-btn {
-  background-color: #ff4d4f;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
+/* 댓글 삭제 버튼 스타일 */
+.comment-footer .delete-icon {
+  width: 20px; /* X 이모티콘 너비 */
+  height: 20px; /* X 이모티콘 높이 */
+  cursor: pointer; /* 클릭 가능한 커서 표시 */
+  display: flex; /* 플렉스 박스를 사용하여 정렬 */
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  background-color: #ff4d4f; /* 배경색 설정 */
+  border-radius: 50%; /* 원형 버튼으로 설정 */
+  border: none; /* 테두리 제거 */
 }
 
-.comment-footer .delete-btn:hover {
-  background-color: #d9363e;
+.comment-footer .delete-icon:hover {
+  background-color: #d9363e; /* 호버 시 배경색 변경 */
 }
+
 
 textarea {
   width: 100%;
