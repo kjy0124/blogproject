@@ -10,22 +10,24 @@
       </button>
       <button v-else class="logout-button" @click="logout">로그아웃</button>
     </header>
-    <!-- 검색 기능 -->
-    <div class="search-container">
-      <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요" class="search-input" />
-      <button @click="searchPosts" class="search-button">검색</button>
-    </div>
     <div class="post-list-container">
       <h2 class="post-list-title">글 목록</h2>
-
-      <!-- 내가 쓴 글 필터 -->
+      
+      <div class="filter-container">
+        <!-- 내가 쓴 글 필터 -->
       <div class="myPosts">
         <label>
           <input type="checkbox" v-model="filterMyPosts" @change="reloadPosts" />
           내가 쓴 글
         </label>
       </div>
-
+      <!-- 검색 기능 -->
+      <div class="search-container">
+        <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요" class="search-input" />
+        <button @click="searchPosts" class="search-button">검색</button>
+      </div>
+      </div>
+      
       <!-- 글목록 -->
       <div class="post-list">
         <div v-for="post in paginatedPosts" :key="post.id" class="post-item">
@@ -195,18 +197,16 @@ export default {
 }
 
 .post-list-container {
-  top: 5%;
-  width: 90%;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #aba6a6;
-  border-radius: 10px;
-  display: flex;
-  height: 500px;
-  flex-direction: column;
-  height: 530px;
-  position: absolute;
-  top: 10%;
+  width: 90%; /* 컨테이너 너비를 부모 요소의 90%로 설정 */
+  margin: 0 auto; /* 컨테이너를 수평 중앙에 배치 */
+  padding: 20px; /* 내부 여백을 상하좌우로 설정 */
+  background-color: #aba6a6; /* 배경색 설정 */
+  border-radius: 10px; /* 모서리를 둥글게 설정 */
+  display: flex; /* 플렉스 박스를 사용하여 자식 요소 정렬 */
+  flex-direction: column; /* 플렉스 방향을 세로(열)로 설정 */
+  height: 650px; /* 컨테이너 높이를 설정 */
+  position: absolute; /* 부모 요소를 기준으로 절대 위치 지정 */
+  top: 10%; /* 상단에서 부모 요소 기준으로 떨어진 위치 지정 */
 }
 
 .logout-button {
@@ -318,44 +318,32 @@ export default {
   background-color: #0056b3;
   color: white;
 }
+.filter-container {
+  display: flex; /* 부모 박스 내가 쓴 글, 검색 기능 */
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
 
 .myPosts {
-  margin-bottom: 20px;
+  margin-right: auto; /* 내가 쓴 글 왼쪽에 고정 */
 }
 
 .search-container {
   display: flex;
-  justify-content: center;
-  margin-top: 0;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 40px;
+  align-items: center;
+  height:40px;
 }
 
 .search-input {
-  padding: 10px;
-  font-size: 16px;
-  width: 230px;
+  padding: 5px;
+  font-size: 12px;
+  width: 200px;
 }
 
 .search-button {
-  padding: 10px;
+  padding: 5px;
   margin-left: 10px;
-  font-size: 16px;
-}
-@media (max-width: 600px) {
-  .search-input {
-    width: 200px;
-    font-size: 14px;
-    padding: 8px;
-  }
-
-  .search-button {
-    font-size: 14px; 
-    padding: 8px;
-    margin-left: 5px;
-  }
+  font-size: 12px;
 }
 </style>
