@@ -79,7 +79,8 @@ app.post("/create", (req, res) => {
 
 app.get("/list", (req, res) => {
   const { myPostsOnly, currentUserEmail } = req.query;
-  let query = "SELECT id, name, title, content, views, created_at FROM noticeBoard";
+  let query =
+    "SELECT id, name, title, content, views, created_at FROM noticeBoard";
   const params = [];
 
   if (myPostsOnly === "true" && currentUserEmail) {
@@ -99,27 +100,40 @@ app.get("/list", (req, res) => {
 
 //검색 API
 app.get("/api/search", (req, res) => {
-  const keyword = req.query.keyword;
+  // const keyword = req.query.keyword;
+  const { type, keyword } = req.query;
 
   if (!keyword) {
     return res.status(400).json({ message: "검색어를 입력해주세요." });
   }
 
-  const query = `
-    SELECT id, title, content, created_at , name, views
-    FROM noticeboard 
-    WHERE title LIKE ? OR content LIKE ?
-  `;
+  let query = "";
+  const params = [`%${keyword}%`];
 
-  db.query(query, [`%${keyword}%`, `%${keyword}%`], (err, results) => {
+  if (type === "title") {
+    query = `
+      SELECT id, title, content, created_at, name, views
+      FROM noticeBoard
+      WHERE title LIKE ?
+      `;
+  } else if (type === "name") {
+    query = `
+      SELECT id, title, content, created_at, name, views
+      FROM noticeBoard
+      WHERE name LIKE ?
+      `;
+  } else {
+    return res.status(400).json({ message: "유효하지 않은 검색 타입입니다." });
+  }
+
+  db.query(query, params, (err, results) => {
     if (err) {
-      console.error("검색 실패:", err);
+      console.error("검색 싪패:", err);
       return res.status(500).json({ message: "검색 중 오류가 발생했습니다.", error: err });
     }
     res.json(results);
   });
 });
-
 
 // GET /detail/:id 라우트
 app.get("/detail/:id", (req, res) => {
@@ -282,7 +296,9 @@ app.post("/api/comments/:id/likes", (req, res) => {
       db.query(deleteQuery, [userEmail, commentId], (err) => {
         if (err) {
           console.error("좋아요 취소 실패:", err);
-          return res.status(500).json({ message: "좋아요 취소 실패", error: err });
+          return res
+            .status(500)
+            .json({ message: "좋아요 취소 실패", error: err });
         }
         return res.status(200).json({ message: "좋아요 취소 성공" });
       });
@@ -292,14 +308,15 @@ app.post("/api/comments/:id/likes", (req, res) => {
       db.query(insertQuery, [userEmail, commentId], (err) => {
         if (err) {
           console.error("좋아요 추가 실패:", err);
-          return res.status(500).json({ message: "좋아요 추가 실패", error: err });
+          return res
+            .status(500)
+            .json({ message: "좋아요 추가 실패", error: err });
         }
         return res.status(200).json({ message: "좋아요 추가 성공" });
       });
     }
   });
 });
-
 
 //좋아요 조회 API
 app.get("/api/comments/:id/likes", async (req, res) => {
@@ -312,16 +329,19 @@ app.get("/api/comments/:id/likes", async (req, res) => {
 
   try {
     // 좋아요 개수 조회
-    const [likeCountRows] = await db.promise().query(
-      "SELECT COUNT(*) AS likesCount FROM likes WHERE post_id = ?",
-      [commentId]
-    );
+    const [likeCountRows] = await db
+      .promise()
+      .query("SELECT COUNT(*) AS likesCount FROM likes WHERE post_id = ?", [
+        commentId,
+      ]);
 
     // 사용자의 좋아요 여부 확인
-    const [userLikeRows] = await db.promise().query(
-      "SELECT * FROM likes WHERE user_id = ? AND post_id = ?",
-      [userEmail, commentId]
-    );
+    const [userLikeRows] = await db
+      .promise()
+      .query("SELECT * FROM likes WHERE user_id = ? AND post_id = ?", [
+        userEmail,
+        commentId,
+      ]);
 
     res.json({
       likesCount: likeCountRows[0].likesCount || 0,
@@ -363,7 +383,8 @@ app.post("/comments/:postId", (req, res) => {
     return res.status(400).json({ message: "모든 필드를 입력해주세요." });
   }
 
-  const query = "INSERT INTO comments (postId, userId, content) VALUES (?, ?, ?)";
+  const query =
+    "INSERT INTO comments (postId, userId, content) VALUES (?, ?, ?)";
   db.query(query, [postId, userEmail, content], (err, results) => {
     if (err) {
       console.error("댓글 작성 실패:", err);
@@ -429,7 +450,10 @@ app.delete("/comments/:commentId", (req, res) => {
       return res.status(404).json({ message: "댓글이 존재하지 않습니다." });
     }
     const commentAuthorEmail = results[0].userId;
-    if (commentAuthorEmail.trim().toLowerCase() !== currentUserEmail.trim().toLowerCase()) {
+    if (
+      commentAuthorEmail.trim().toLowerCase() !==
+      currentUserEmail.trim().toLowerCase()
+    ) {
       return res.status(403).json({ message: "삭제 권한이 없습니다." });
     }
 
@@ -437,14 +461,18 @@ app.delete("/comments/:commentId", (req, res) => {
     const deleteLikesQuery = "DELETE FROM likes WHERE post_id = ?";
     db.query(deleteLikesQuery, [commentId], (err) => {
       if (err) {
-        return res.status(500).json({ message: "좋아요 기록 삭제 실패", error: err });
+        return res
+          .status(500)
+          .json({ message: "좋아요 기록 삭제 실패", error: err });
       }
 
       // 댓글 삭제
       const deleteCommentQuery = "DELETE FROM comments WHERE id = ?";
       db.query(deleteCommentQuery, [commentId], (err, results) => {
         if (err) {
-          return res.status(500).json({ message: "댓글 삭제 실패", error: err });
+          return res
+            .status(500)
+            .json({ message: "댓글 삭제 실패", error: err });
         }
         if (results.affectedRows === 0) {
           return res.status(404).json({ message: "댓글이 존재하지 않습니다." });
