@@ -179,51 +179,62 @@ app.put("/detail/:id/views", (req, res) => {
   });
 });
 
+//게시글 삭제 API
 app.delete("/detail/:id", (req, res) => {
-  const postId = parseInt(req.params.id);
-
-  //요청 헤더에서 현재 사용자이메일 가져오기
-  const currentUserEmail = req.headers["current-user"];
+  const postId = parseInt(req.params.id, 10); // 게시글 ID
+  const currentUserEmail = req.headers["current-user"]; // 현재 사용자 이메일
 
   if (!currentUserEmail) {
     return res.status(401).json({ message: "로그인이 필요합니다." });
   }
 
-  //게시물 작성자 확인
+  // 게시물 작성자 확인
   const selectQuery = "SELECT email FROM noticeBoard WHERE id = ?";
   db.query(selectQuery, [postId], (err, results) => {
     if (err) {
-      return res.status(500).json({ message: "게시물 삭제 실패", error: err });
+      return res.status(500).json({ message: "게시물 조회 실패", error: err });
     }
-
     if (results.length === 0) {
       return res.status(404).json({ message: "게시물이 존재하지 않습니다." });
     }
 
     const postAuthorEmail = results[0].email;
-    console.log("작성자 이메일:", postAuthorEmail);
-
-    if (
-      postAuthorEmail.trim().toLowerCase() !==
-      currentUserEmail.trim().toLowerCase()
-    ) {
+    if (postAuthorEmail.trim().toLowerCase() !== currentUserEmail.trim().toLowerCase()) {
       return res.status(403).json({ message: "삭제 권한이 없습니다." });
     }
 
-    // 작성자가 일치하면 삭제
-    const deleteQuery = "DELETE FROM noticeBoard WHERE id = ?";
-    db.query(deleteQuery, [postId], (err) => {
+    // 댓글에 연결된 좋아요 기록 삭제
+    const deleteLikesQuery = `
+      DELETE likes 
+      FROM likes 
+      JOIN comments ON likes.post_id = comments.id 
+      WHERE comments.postId = ?`;
+    db.query(deleteLikesQuery, [postId], (err) => {
       if (err) {
-        console.error("게시물 삭제 실패", err);
-        return res
-          .status(500)
-          .json({ message: "게시물 삭제 실패", error: err });
+        return res.status(500).json({ message: "좋아요 기록 삭제 실패", error: err });
       }
 
-      res.status(200).json({ message: "게시물 삭제 성공" });
+      // 댓글 삭제
+      const deleteCommentsQuery = "DELETE FROM comments WHERE postId = ?";
+      db.query(deleteCommentsQuery, [postId], (err) => {
+        if (err) {
+          return res.status(500).json({ message: "댓글 삭제 실패", error: err });
+        }
+
+        // 게시글 삭제
+        const deletePostQuery = "DELETE FROM noticeBoard WHERE id = ?";
+        db.query(deletePostQuery, [postId], (err) => {
+          if (err) {
+            return res.status(500).json({ message: "게시물 삭제 실패", error: err });
+          }
+          res.status(200).json({ message: "게시물 및 관련 데이터 삭제 성공" });
+        });
+      });
     });
   });
 });
+
+
 
 // 게시물 수정 API
 app.put("/detail/:id", (req, res) => {
