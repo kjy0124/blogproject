@@ -10,13 +10,8 @@
       </button>
       <button v-else class="logout-button" @click="logout">로그아웃</button>
     </header>
-    
-      
     <div class="post-list-container">
       <h2 class="post-list-title">글 목록</h2>
-
-
-
       <div class="filter-container">
       <!-- 내가 쓴 글 필터 -->
       <div class="myPosts">
@@ -34,6 +29,7 @@
           <option value="title">제목</option>
           <option value="name">작성자</option>
         </select>
+
         <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요" class="search-input" />
       <button type="submit" class="search-button">검색</button>
       </form>
@@ -355,11 +351,12 @@ export default {
   padding: 5px;
   font-size: 12px;
   width: 200px;
+  margin-left: 7px; /* 버튼과 입력 필드 사이 간격 추가 */
 }
 
 .search-button {
   padding: 5px;
-  margin-left: 10px;
+  margin-left: 7px;
   font-size: 12px;
 }
 
