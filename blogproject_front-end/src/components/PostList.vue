@@ -5,7 +5,7 @@
       <h1>
         <router-link to="/" class="blog_title">BlogProject</router-link>
       </h1>
-      <button v-if="!isLoggedIn" class="logout-button" @click="goToUserLogin">
+      <button v-if="!isLoggedIn" class="action-button" @click="goToUserLogin">
         로그인
       </button>
       <button v-else class="logout-button" @click="logout">로그아웃</button>
@@ -193,6 +193,8 @@ export default {
   align-items: center;
   margin-bottom: 0;
   padding: 10px;
+  background-color: #f4f4f4;
+  border-bottom: 1px solid #ddd;
 }
 
 .blog_title {
@@ -208,11 +210,13 @@ export default {
 }
 
 .post-list-container {
-  width: 90%; /* 컨테이너 너비를 부모 요소의 90%로 설정 */
+  width: 95%; /* 컨테이너 너비를 부모 요소의 100%로 설정 */
+  max-width: 1200px;
   margin: 0 auto; /* 컨테이너를 수평 중앙에 배치 */
   padding: 20px; /* 내부 여백을 상하좌우로 설정 */
-  background-color: #aba6a6; /* 배경색 설정 */
+  background-color: #ada9a9; /* 배경색 설정 */
   border-radius: 10px; /* 모서리를 둥글게 설정 */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
   display: flex; /* 플렉스 박스를 사용하여 자식 요소 정렬 */
   flex-direction: column; /* 플렉스 방향을 세로(열)로 설정 */
   height: 650px; /* 컨테이너 높이를 설정 */
@@ -221,15 +225,16 @@ export default {
 }
 
 .logout-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
   position: absolute;
   top: 10px;
   right: 10px;
-  border: none;
-  color: black;
-  font-size: 12px;
+  font-size: 10px;
   cursor: pointer;
   padding: 5px 16px;
-  background-color: transparent;
 }
 
 .post-list-title {
@@ -248,11 +253,14 @@ export default {
 .post-item {
   display: flex;
   justify-content: space-between;
+  gap:10px;
   align-items: center;
   background-color: #f9f9f9;
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 10px;
   border: 1px solid #ddd;
+  margin-bottom: 10px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
 }
 
 .blog_title {
@@ -343,8 +351,7 @@ export default {
 
 .search-container {
   display: flex;
-  align-items: center;
-  height:40px;
+  
 }
 
 .search-input {

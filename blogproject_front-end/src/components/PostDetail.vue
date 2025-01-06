@@ -342,6 +342,9 @@ async addComment() {
 
 
 .container {
+  width: 95%;
+  max-width: 1200px;
+  margin: 0 auto; /* 컨테이너를 수평 중앙에 배치 */
   display: flex;
   justify-content: center;
   margin-top: 50px;
@@ -367,20 +370,21 @@ async addComment() {
 
 /* 로그아웃 버튼 */
 .logout-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
   position: absolute;
   top: 10px;
   right: 10px;
-  border: none;
-  color: black;
-  font-size: 12px;
+  font-size: 10px;
   cursor: pointer;
-  padding: 8px 16px;
-  background-color: transparent;
+  padding: 5px 16px;
 }
 
 .post-detail {
-  width: 80%;
-  max-width: 900px;
+  width: 100%;
+  max-width: 1200px;
   /* 최대 너비 설정 */
   background-color: #f9f9f9;
   /* 흰색 배경 */

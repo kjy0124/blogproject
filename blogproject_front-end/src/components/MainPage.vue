@@ -14,9 +14,13 @@
       <main class="post-list">
         <div v-for="post in sortedPost" :key="post.id" class="post-item">
           <h2>{{ post.title }}</h2>
-          <p>글쓴이 : {{ post.name }}</p>
-          <p>날짜 : {{ formatDate(post.created_at) }}</p>
-          <p>조회수 : {{ post.views }}</p>
+          <div class="post-meta">
+            <p class="author">글쓴이 : {{ post.name }}</p>
+            <div class="meta-right">
+              <p class="date">작성일 : {{ formatDate(post.created_at) }}</p>
+          <p class="views">조회수 : {{ post.views }}</p>
+            </div>
+          </div>
           <p v-html="post.content"></p>
         </div>
       </main>
@@ -111,13 +115,13 @@ export default {
 <style lang="css" scoped>
 .blog-container {
   font-family: Arial, sans-serif;
-  margin: 0 auto;
-  max-width: 1000px;
-  padding: 20px;
+  margin: 0 auto; /*수평 중앙 정렬 */
+  padding: 15px;
   border: 2px solid #ddd; /* 전체 컨테이너 테두리 */
   border-radius: 10px; /* 둥근 모서리 */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-  background-color: #aba6a6; /* 회색 배경 */
+  max-width: 1200px;
+  background-color: #f4f4f4; /* 회색 배경 */
 }
 
 .blog-header {
@@ -126,6 +130,7 @@ export default {
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid #ccc;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .menu-button {
@@ -135,6 +140,7 @@ export default {
   cursor: pointer;
   font-size: 14px;
   border-radius: 5px;
+  margin-left: 10px;
 }
 
 .blog-title {
@@ -199,12 +205,31 @@ export default {
 }
 
 .post-item {
+  display: flex; /* 가로 정렬 */
+  flex-direction: column; /* 기본적으로 세로 정렬 */
+  gap: 10px; /* 요소 간 간격 */
+
   border: 1px solid #ddd;
   padding: 10px;
   border-radius: 5px;
   background-color: #f9f9f9;
 }
-
+.post-meta {
+  display: flex; /* 가로 정렬 */
+  justify-content: space-between; /* 양쪽 끝으로 배치 */
+  align-items: center; /* 수직 중앙 정렬 */
+}
+.meta-right{
+  display: flex;
+  gap: 15px;
+}
+.author{
+  font-size: 14px;
+}
+.date,
+.views{
+  font-size: 14px;
+}
 .post-item h2 {
   /* margin: 0 0 5px 0; */
   margin-bottom: 10px;

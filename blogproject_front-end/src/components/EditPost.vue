@@ -155,7 +155,8 @@ body {
 }
 
 .edit-post-container {
-  width: 80%;
+  width: 95%;
+  max-width: 1200px;
   margin: 50px auto;
   background-color: #aba6a6;
   padding: 20px;
@@ -187,15 +188,16 @@ h1 {
 
 /* 로그아웃 버튼 */
 .logout-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
   position: absolute;
   top: 10px;
   right: 10px;
-  border: none;
-  color: black;
-  font-size: 12px;
+  font-size: 10px;
   cursor: pointer;
-  padding: 8px 16px;
-  background-color: transparent;
+  padding: 5px 16px;
 }
 
 form {
