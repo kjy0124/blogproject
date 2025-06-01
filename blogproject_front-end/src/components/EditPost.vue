@@ -23,7 +23,7 @@
         <label for="content">내용</label>
         <div id="editor"></div>
       </div>
-      <div class="button-group">
+      <div class="button-group"><!-- 버튼 그룹 (취소 및 수정 완료 버튼) -->
         <button type="button" @click="cancelEdit">취소</button>
         <button type="submit" class="edit-btn">수정 완료</button>
       </div>
@@ -42,25 +42,23 @@ export default {
     return {
       title: "",
       content: "",
-      postId: null, // 글 ID
+      postId: null, //수정할 글 ID
       isLoggedIn: !!localStorage.getItem("currentUser"),
     };
   },
   created() {
     this.loadPostData();
   },
-  methods: {
-    // 해당 ID의 포스트 데이터를 불러오는 메서드
+  methods: {// 해당 ID의 포스트 데이터를 불러오는 메서드
     async loadPostData() {
-      // URL에서 전달된 post ID를 가져옵니다.
-      const postId = parseInt(this.$route.params.id); // 정수 변환
+      const postId = parseInt(this.$route.params.id);// URL에서 전달된 post ID를 가져옴
       this.postId = postId;
 
       try {
         const response = await axios.get(
           `http://localhost:3000/detail/${postId}`
         );
-        const post = response.data.post;
+        const post = response.data.post;//서버에서 반환된 게시글 데이터
         this.title = post.title;
         this.content = post.content;
         if (this.editor) {
@@ -72,8 +70,8 @@ export default {
       }
     },
 
-    // 수정된 글을 저장하는 메서드
-    async submitPost() {
+
+    async submitPost() {// 수정된 글을 저장하는 메서드
       const currentUser = JSON.parse(localStorage.getItem('currentUser'));
       if (!currentUser) {
         alert('로그인이 필요합니다.');
@@ -85,7 +83,7 @@ export default {
 
       try {
         const response = await axios.put(
-          `http://localhost:3000/detail/${this.postId}`,
+          `http://localhost:3000/detail/${this.postId}`,// 수정할 게시글의 API 엔드포인트
           {
             title: this.title,
             content: this.content,
@@ -104,8 +102,8 @@ export default {
         alert("수정에 실패했습니다. 다시 시도해주세요.");
       }
     },
-    // 수정 취소 (글 목록으로 돌아가기)
-    cancelEdit() {
+    
+    cancelEdit() {// 수정 취소 (글 목록으로 돌아가기)
       this.$router.push("/list");
     },
 
@@ -142,7 +140,7 @@ export default {
 </script>
 
 <style scoped>
-#editor {
+#editor {/*에디터 스타일 */
   height: 400px;
   background: #fff;
   border: 1px solid #ccc;
@@ -154,12 +152,12 @@ body {
   background-color: white;
 }
 
-.edit-post-container {
+.edit-post-container {/*글 수정 페이지 컨테이너 */
   width: 95%;
   max-width: 1200px;
   margin: 50px auto;
   background-color: #aba6a6;
-  padding: 20px;
+  padding: 20px;/* 내부 여백 */
   border-radius: 10px;
 }
 
@@ -186,7 +184,7 @@ h1 {
   color: black;
 }
 
-/* 로그아웃 버튼 */
+
 .logout-button {
   background-color: #007bff;
   color: white;

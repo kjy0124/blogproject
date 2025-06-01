@@ -3,7 +3,7 @@
   <div class="create-post-container">
     <header>
       <h1>
-        <router-link to="/" class="blog_title">BlogProject</router-link>
+        <router-link to="/" class="blog_title">BlogProject</router-link><!--홈으로 이동-->
       </h1>
       <button class="logout-button" @click="logout">로그아웃</button>
     </header>
@@ -23,7 +23,7 @@
         <label for="content">내용</label>
         <div id="editor"></div>
       </div>
-      <div class="inputfile">
+      <div class="inputfile"><!--파일 업로드-->
         <input type="file" name="boardfile" id="inputFile" />
       </div>
       <button type="submit" class="complete-button">작성 완료</button>
@@ -46,13 +46,13 @@ export default {
   },
   methods: {
     submitPost() {
-      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));//현재 사용자 정보
 
       if (!currentUser || !currentUser.name || !currentUser.email) {
         alert.apply("로그인이 필요합니다.");
         this.$router.push("/login");
         return;
-      }
+      }//로그인 확인 조건
 
       this.content = this.editor.root.innerHTML;
 
@@ -67,10 +67,10 @@ export default {
         views: 0, //초기 조회수
       };
 
-      axios
+      axios//서버에 게시글 데이터 전송 post 요청
         .post('http://localhost:3000/create', newPost)
         .then(() => {
-          this.$router.push("/list");
+          this.$router.push("/list");//성공 시 게시글 목록 이동
         })
         .catch((error) => {
           console.error("게시물 생성 중 오류 발생:", error);
@@ -86,12 +86,12 @@ export default {
   mounted() {
     // Quill 초기화
     this.editor = new Quill("#editor", {
-      theme: "snow", // 기본 테마 설정
+      theme: "snow", // 기본 눈 테마 설정
       placeholder: "내용을 입력하세요.",
       modules: {
         toolbar: [
-          ["bold", "italic", "underline", "strike"], // 텍스트 꾸미기
-          [{ list: "ordered" }, { list: "bullet" }], // 리스트
+          ["bold", "italic", "underline", "strike"], // 텍스트 꾸미기 옵션 굵게, 기울임, 밑줄, 취소선
+          [{ list: "ordered" }, { list: "bullet" }], // 리스트 옵션
           ["link", "image"], // 링크와 이미지
           [{ align: [] }], // 텍스트 정렬
           [{ size: ["small", false, "large", "huge"] }], // 텍스트 크기
@@ -112,13 +112,13 @@ export default {
   padding: 10px;
 }
 
-.create-post-container {
+.create-post-container {/*전체 작성 페이지 컨테이너 */
   width: 90%;
   margin: 50px auto;
   background-color: #aba6a6;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;/* 모서리 둥글게*/
+  box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.1);/*그림자 효과 */
 }
 
 .header {
@@ -139,8 +139,8 @@ export default {
   color: black;
 }
 
-/* 로그아웃 버튼 */
-.logout-button {
+
+.logout-button {/* 로그아웃 버튼 */
   position: absolute;
   top: 10px;
   right: 10px;
@@ -151,8 +151,8 @@ export default {
   padding: 8px 16px;
 }
 
-/* 글작성 제목 */
-.create-post-title {
+
+.create-post-title {/* 글작성 제목 스타일 */
   text-align: center;
   font-size: 24px;
   font-weight: bold;

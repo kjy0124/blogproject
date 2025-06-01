@@ -10,35 +10,32 @@
       </button>
       <button v-else class="logout-button" @click="logout">로그아웃</button>
     </header>
-    <div class="post-list-container">
+    <div class="post-list-container"> <!-- 전체 글 목록 컨테이너 -->
       <h2 class="post-list-title">글 목록</h2>
-      <div class="filter-container">
-      <!-- 내가 쓴 글 필터 -->
-      <div class="myPosts">
-        <label>
-          <input type="checkbox" v-model="filterMyPosts" @change="reloadPosts" />
-          내가 쓴 글
-        </label>
+      <div class="filter-container"><!--필터 및 검색 -->
+        <div class="myPosts"><!--내가 쓴 글 필터-->
+          <label>
+            <input type="checkbox" v-model="filterMyPosts" @change="reloadPosts" /><!--내가 쓴 글 필터 체크박스-->
+            내가 쓴 글
+          </label>
+        </div>
+
+        <!-- 검색 기능 -->
+        <div class="search-container">
+          <form @submit.prevent="searchPosts">
+            <label for="sc"></label>
+            <select v-model="searchType" name="search" id="sc"><!--검색 타입 선택-->
+              <option value="title">제목</option>
+              <option value="name">작성자</option><!--검색 버튼 제목과 작성자로 선택-->
+            </select>
+            <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요" class="search-input" />
+            <button type="submit" class="search-button">검색</button>
+          </form>
+        </div>
       </div>
 
-      <!-- 검색 기능 -->
-    <div class="search-container">
-      <form @submit.prevent="searchPosts">
-        <label for="sc"></label>
-        <select v-model="searchType" name="search" id="sc">
-          <option value="title">제목</option>
-          <option value="name">작성자</option>
-        </select>
-
-        <input type="text" v-model="searchKeyword" placeholder="검색어를 입력하세요" class="search-input" />
-      <button type="submit" class="search-button">검색</button>
-      </form>
-    </div>
-    </div>
-   
-      <!-- 글목록 -->
-      <div class="post-list">
-        <div v-for="post in paginatedPosts" :key="post.id" class="post-item">
+      <div class="post-list"><!-- 글 목록 -->
+        <div v-for="post in paginatedPosts" :key="post.id" class="post-item"><!-- 글 목록 아이템 -->
           <span class="author">글쓴이: {{ post.name }}</span>
           <router-link :to="`/detail/${post.id}`">
             <h2 class="title">{{ post.title }}</h2>
@@ -48,10 +45,9 @@
         </div>
       </div>
 
-      <!-- 페이지 -->
-      <div class="pagination">
+      <div class="pagination"><!--하단 페이지 버튼-->
         <button v-for="page in totalPages" :key="page" @click="changePage(page)"
-          :class="{ active: currentPage === page }" class="pagination-btn">
+          :class="{ active: currentPage === page }" class="pagination-btn"><!--페이지 번호 버튼-->
           {{ page }}
         </button>
       </div>
@@ -68,7 +64,7 @@
 import axios from "axios";
 
 export default {
-  name: "PostList",
+  name: "PostList",//컴포넌트 이름
   data() {
     return {
       posts: [],
@@ -82,23 +78,23 @@ export default {
   },
 
   computed: {
-    sortedPosts() {
+    sortedPosts() {//최신순으로 정렬된 게시글 목록 반환함
       return [...this.posts].sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)//최신순으로 정렬
       );
     },
-    paginatedPosts() {
+    paginatedPosts() {//현재 페이지에 해당하는 게시글 목록 반환함
       const startIndex = (this.currentPage - 1) * this.postPerPage;
-      const endIndex = startIndex + this.postPerPage;
-      return this.sortedPosts.slice(startIndex, endIndex);
+      const endIndex = startIndex + this.postPerPage;//시작 인덱스와 끝 인덱스 계산
+      return this.sortedPosts.slice(startIndex, endIndex);//시작 인덱스부터 끝 인덱스까지의 게시글 목록 반환
     },
-    totalPages() {
+    totalPages() {//전체 페이지 수
       return Math.ceil(this.posts.length / this.postPerPage);
     },
   },
 
   methods: {
-    async reloadPosts() {
+    async reloadPosts() {//게시글 목록 다시 불러오기
       try {
         const currentUserData = localStorage.getItem("currentUser");
         const currentUser = currentUserData
@@ -122,7 +118,7 @@ export default {
       }
     },
 
-    async searchPosts() {
+    async searchPosts() {//검색 기능
       if (!this.searchKeyword.trim()) {
         alert("검색어를 입력해주세요.");
         return;
@@ -130,9 +126,10 @@ export default {
 
       try {
         const response = await axios.get("http://localhost:3000/api/search", {
-          params: { 
+          params: {
             type: this.searchType,//검색 타입(제목 또는 작성자)
-            keyword: this.searchKeyword.trim(), },
+            keyword: this.searchKeyword.trim(),
+          },
         });
         this.posts = response.data; // 검색 결과를 posts에 저장
         this.currentPage = 1; // 검색 후 첫 페이지로 초기화
@@ -174,7 +171,7 @@ export default {
     },
   },
 
-  mounted() {
+  mounted() {//컴포넌트가 화면에 나타날 때 실행
     this.reloadPosts();
   },
 };
@@ -210,18 +207,18 @@ export default {
 }
 
 .post-list-container {
-  width: 95%; /* 컨테이너 너비를 부모 요소의 100%로 설정 */
+  width: 95%;
   max-width: 1200px;
-  margin: 0 auto; /* 컨테이너를 수평 중앙에 배치 */
-  padding: 20px; /* 내부 여백을 상하좌우로 설정 */
-  background-color: #ada9a9; /* 배경색 설정 */
-  border-radius: 10px; /* 모서리를 둥글게 설정 */
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-  display: flex; /* 플렉스 박스를 사용하여 자식 요소 정렬 */
-  flex-direction: column; /* 플렉스 방향을 세로(열)로 설정 */
-  height: 650px; /* 컨테이너 높이를 설정 */
-  position: absolute; /* 부모 요소를 기준으로 절대 위치 지정 */
-  top: 10%; /* 상단에서 부모 요소 기준으로 떨어진 위치 지정 */
+  margin: 0 auto;/* 컨테이너를 수평 중앙에 배치 */
+  padding: 20px;
+  background-color: #ada9a9;
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;/* 플렉스 방향을 세로(열)로 설정 */
+  height: 650px;
+  position: absolute;
+  top: 10%;/* 상단에서 부모 요소 기준 */
 }
 
 .logout-button {
@@ -253,14 +250,14 @@ export default {
 .post-item {
   display: flex;
   justify-content: space-between;
-  gap:10px;
+  gap: 10px;
   align-items: center;
   background-color: #f9f9f9;
   padding: 15px;
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-bottom: 10px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .blog_title {
@@ -281,8 +278,7 @@ export default {
 .title {
   font-size: 18px;
   font-weight: bold;
-  flex-grow: 1;
-  /*가로 공간*/
+  flex-grow: 1;/*가로 공간*/
   margin: 0 10px;
 }
 
@@ -298,7 +294,6 @@ export default {
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
-  /* align-self: flex-end; */
   position: absolute;
   bottom: 20px;
   right: 20px;
@@ -339,7 +334,7 @@ export default {
 }
 
 .filter-container {
-  display: flex; /* 부모 박스 내가 쓴 글, 검색 기능 */
+  display: flex;/* 부모 박스 내가 쓴 글, 검색 기능 */
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
@@ -351,14 +346,14 @@ export default {
 
 .search-container {
   display: flex;
-  
+
 }
 
 .search-input {
   padding: 5px;
   font-size: 12px;
   width: 200px;
-  margin-left: 7px; /* 버튼과 입력 필드 사이 간격 추가 */
+  margin-left: 7px;/* 버튼과 입력 필드 사이 간격 추가 */
 }
 
 .search-button {
@@ -366,6 +361,4 @@ export default {
   margin-left: 7px;
   font-size: 12px;
 }
-
-
 </style>

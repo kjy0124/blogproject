@@ -32,7 +32,7 @@
 export default {
   name: "BlogMain",
   data() {
-    return {
+    return { //초기 데이터
       posts: [
         {
           id: 1,
@@ -48,29 +48,29 @@ export default {
     };
   },
 
-  computed: {
+  computed: {//조회수 내림차순 정렬
     sortedPost() {
       return [...this.posts]
-        .sort((a, b) => b.views - a.views)
+        .sort((a, b) => b.views - a.views)//조회수 내림차순
         .slice(0, 2);
     },
   },
 
   mounted(){
-    fetch('http://localhost:3000/list')
+    fetch('http://localhost:3000/list')//서버에서 데이터 가져오기
     .then(response => response.json())
     .then(data => {
-      this.posts = data.sort((a, b) => b.views - a.views);
+      this.posts = data.sort((a, b) => b.views - a.views);//조회수 내림차순
     })
     .catch(error => console.error('Error fetching posts:', error));
 
-  window.addEventListener('storage', this.syncLoginState);
+  window.addEventListener('storage', this.syncLoginState);//
   },
   methods: {
     onDragStart(event) {
       event.dataTransfer.setData("text", "menu-button");
     },
-    onDrop(event) {
+    onDrop(event) {//드래그된 데이터 가져옴
       const draggedItem = event.dataTransfer.getData("text");
       if (draggedItem === "menu-button") {
         this.previewVisible = true;
