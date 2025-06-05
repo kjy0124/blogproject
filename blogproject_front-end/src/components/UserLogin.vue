@@ -1,7 +1,7 @@
 <template><!--로그인-->
   <div class="container">
     <h1>
-      <router-link to="/" class="blog-title">BlogProject</router-link>
+      <router-link to="/" class="blog-title">📝 BlogRoot</router-link>
     </h1>
     <div class="login-container"><!-- 로그인 폼 컨테이너 -->
       <h2>Login</h2>
@@ -71,110 +71,95 @@ export default {
 }
 
 body {
-  background-color: #f3f3f3;
+  background: linear-gradient(135deg, #f3f4f6, #dbeafe);
+  font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-
 }
 
-.h1 {
-  font-size: 32px;
-  color: #333;
-  margin-top: 20px;
+.blog-title {
+  text-decoration: none;
+  font-size: 36px;
+  font-weight: bold;
+  color: #2c3e50;
   margin-bottom: 20px;
 }
 
 .login-container {
-  width: 360px;
-  padding: 30px;
-  margin-top: 30px;
-  background-color: #aba6a6;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  ;
+  width: 380px;
+  padding: 40px 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-.login-container > h2 {/* 로그인 폼 제목 스타일 */
-  font-size: 20px;
-  color: black;
-  margin-bottom: 20px;
+.login-container > h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+  text-align: center;
 }
 
 #login-form {
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
-#login-form label {/* 라벨 스타일 */
-  font-size: 14px;
-  color: #000;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-#login-form input[type="text"],/* 입력 필드 스타일 */
-#login-form input[type="password"] {
-  width: 100%;
-  height: 40px;
-  padding: 8px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  background-color: #F8F8F8;
-  border: 1px solid #ccc;
-}
-
-#login-form input[type="text"]::placeholder,
-#login-form input[type="password"]::placeholder {
-  color: #b0b0b0;
-}
-
-#login-form > .button-group {/* 버튼 그룹 스타일 */
-  display: flex;
-  justify-content: space-between;
-}
-
-#login-form > input[type="submit"] {
-  width: 48%;
-  padding: 10px;
-  color: black;
-  font-size: 14px;
-  background-color: #f8f8f8;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-#login-form input[type="submit"]:hover {
-  background-color: #f8f8f8;
-}
-
-/* 로그인, 회원가입 버튼  */
-.submit-button,
-.signup-button {
-  width: 35%;
-  padding: 10px;
+#login-form label {
   font-size: 14px;
   color: #333;
-  background-color: #f8f8f8;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  margin-bottom: 4px;
 }
 
+#login-form input[type="text"],
+#login-form input[type="password"] {
+  height: 42px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+#login-form input[type="text"]:focus,
+#login-form input[type="password"]:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  outline: none;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.submit-button,
+.signup-button {
+  width: 48%;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #4f46e5;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
 .submit-button:hover,
 .signup-button:hover {
-  background-color: #5a6268;
+  background-color: #4338ca;
 }
 
-.blog-title {/* 블로그 제목 스타일 */
-  text-decoration: none;
-  color: #000;
-  font-size: 32px;
-}
 </style>

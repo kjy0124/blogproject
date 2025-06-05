@@ -1,7 +1,7 @@
 <template>
   <!--회원가입-->
   <div class="container">
-    <router-link to="/" class="blogTitle">BlogProject</router-link>
+    <router-link to="/" class="blogTitle">📝 BlogRoot</router-link>
     <div class="signup-container">
       <h2>회원가입</h2>
       <form @submit.prevent="submitForm" id="signup-form">
@@ -75,84 +75,91 @@ export default {
 }
 
 body {
-  background-color: #f3f3f3;
+  background: linear-gradient(135deg, #f3f4f6, #dbeafe);
+  font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-
-}
-
-.h1 {
-  font-size: 32px;
-  color: #333;
-  margin-top: 20px;
-  margin-bottom: 20px;
 }
 
 .blogTitle {
   text-decoration: none;
-  color: #000;
-  font-size: 32px;
+  color: #2c3e50;
+  font-size: 36px;
   font-weight: bold;
-}
-
-.signup-container {/* 회원가입 폼 컨테이너 스타일 */
-  width: 360px;
-  padding: 30px;
-  margin-top: 30px;
-  background-color: #aba6a6;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  ;
-}
-
-.signup-container > h2 {/* 회원가입 제목 */
-  font-size: 20px;
-  color: black;
   margin-bottom: 20px;
+}
+
+.signup-container {
+  width: 380px;
+  padding: 40px 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.signup-container > h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+  text-align: center;
 }
 
 #signup-form {
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
 #signup-form label {
   font-size: 14px;
-  color: #000;
-  margin-bottom: 8px;
-  text-align: left;
+  color: #333;
+  margin-bottom: 4px;
 }
 
-/* 텍스트 및 비밀번호 입력 필드 스타일 */
 #signup-form input[type="text"],
 #signup-form input[type="password"] {
   width: 100%;
-  height: 40px;
-  padding: 8px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  background-color: #F8F8F8;
-  border: 1px solid #ccc;
+  height: 42px;
+  padding: 10px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  background-color: #f8f8f8;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+#signup-form input[type="text"]:focus,
+#signup-form input[type="password"]:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  outline: none;
 }
 
 .signUp-button {
-  widows: 100px;
-  margin: 0 auto;
-  padding: 10px;
-  font-size: 14px;
-  color: #000;
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: #4f46e5;
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  display: block;
+  transition: background-color 0.2s ease;
 }
 
 .signUp-button:hover {
-  background-color: #5a6268;
+  background-color: #4338ca;
 }
+
 </style>

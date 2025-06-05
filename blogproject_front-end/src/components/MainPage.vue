@@ -1,30 +1,35 @@
 <template>
-  <div class="blog-container">
-    <header class="blog-header">
-      <button class="menu-button" @click="goToPostList">목록</button>
-      <h1 class="blog-title">Blog Project</h1>
-      <div class="header-buttons">
-        <button v-if="!isLoggedIn" class="action-button" @click="goToUserLogin">로그인</button>
-        <button v-else class="action-button" @click="logout">로그아웃</button>
-        <button v-if="isLoggedIn" class="action-button" @click="goToCreatePage">글작성</button>
+  <div class="blogroot-container">
+    <header class="blogroot-header">
+      <h1 class="logo">📝 BlogRoot</h1>
+      <div class="header-actions">
+        <button v-if="!isLoggedIn" @click="goToUserLogin">로그인</button>
+        <button v-else @click="logout">로그아웃</button>
+        <button v-if="isLoggedIn" @click="goToCreatePage">글 작성</button>
       </div>
     </header>
 
-    <div class="main-content">
-      <main class="post-list">
-        <div v-for="post in sortedPost" :key="post.id" class="post-item">
-          <h2>{{ post.title }}</h2>
-          <div class="post-meta">
-            <p class="author">글쓴이 : {{ post.name }}</p>
-            <div class="meta-right">
-              <p class="date">작성일 : {{ formatDate(post.created_at) }}</p>
-          <p class="views">조회수 : {{ post.views }}</p>
-            </div>
-          </div>
-          <p v-html="post.content"></p>
+    <!-- 목록 버튼 추가 -->
+    <nav class="nav-bar">
+      <button class="nav-button" @click="goToPostList">📄 전체 글 목록 보기</button>
+    </nav>
+
+    <main class="post-grid">
+      <div
+        v-for="post in sortedPost"
+        :key="post.id"
+        class="post-card"
+        @click="goToDetail(post.id)"
+      >
+        <h2 class="post-title">{{ post.title }}</h2>
+        <div class="post-meta">
+          <span>작성자 {{ post.name }}</span>
+          <span>{{ formatDate(post.created_at) }}</span>
+          <span>👁 {{ post.views }}</span>
         </div>
-      </main>
-    </div>
+        <div class="post-content" v-html="post.content"></div>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -32,215 +37,179 @@
 export default {
   name: "BlogMain",
   data() {
-    return { //초기 데이터
-      posts: [
-        {
-          id: 1,
-          title: '',
-          content: '',
-          author: '',
-          date: '',
-          views: 1,
-        }
-      ],
-      previewVisible: false, // 미리보기 표시 여부
-      isLoggedIn: !!localStorage.getItem('currentUser'),//로그인 여부
+    return {
+      posts: [],
+      isLoggedIn: !!localStorage.getItem("currentUser"),
     };
   },
-
-  computed: {//조회수 내림차순 정렬
+  computed: {
     sortedPost() {
-      return [...this.posts]
-        .sort((a, b) => b.views - a.views)//조회수 내림차순
-        .slice(0, 2);
+      return [...this.posts].sort((a, b) => b.views - a.views).slice(0, 2);
     },
   },
+  mounted() {
+    fetch(`${process.env.VUE_APP_API_URL}/list`)
+      .then((res) => res.json())
+      .then((data) => {
+        this.posts = data;
+      })
+      .catch((err) => console.error(err));
 
-  mounted(){
-    fetch(`${process.env.VUE_APP_API_URL}/list`)//서버에서 데이터 가져오기
-    .then(response => response.json())
-    .then(data => {
-      this.posts = data.sort((a, b) => b.views - a.views);//조회수 내림차순
-    })
-    .catch(error => console.error('Error fetching posts:', error));
-
-  window.addEventListener('storage', this.syncLoginState);//
+    window.addEventListener("storage", this.syncLoginState);
+  },
+  beforeUnmount() {
+    window.removeEventListener("storage", this.syncLoginState);
   },
   methods: {
-    onDragStart(event) {
-      event.dataTransfer.setData("text", "menu-button");
-    },
-    onDrop(event) {//드래그된 데이터 가져옴
-      const draggedItem = event.dataTransfer.getData("text");
-      if (draggedItem === "menu-button") {
-        this.previewVisible = true;
-      }
-    },
     logout() {
-      localStorage.removeItem('currentUser');
+      localStorage.removeItem("currentUser");
       this.isLoggedIn = false;
-      alert('로그아웃 되었습니다.');
+      alert("로그아웃 되었습니다.");
     },
     syncLoginState(event) {
-      if (event.key === 'currentUser') {
-        this.isLoggedIn = !!localStorage.getItem('currentUser');
+      if (event.key === "currentUser") {
+        this.isLoggedIn = !!localStorage.getItem("currentUser");
       }
     },
-
-    goToCreatePage(){
-      this.$router.push('/create');
+    goToCreatePage() {
+      this.$router.push("/create");
     },
-    goToUserLogin(){
-      this.$router.push('/login');
+    goToUserLogin() {
+      this.$router.push("/login");
     },
-    goToPostList(){
-      this.$router.push('/list');
+    goToPostList() {
+      this.$router.push("/list");
+    },
+    goToDetail(id) {
+      this.$router.push(`/detail/${id}`);
     },
     formatDate(dateString) {
       const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
+      return date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     },
-  },
-  beforeUnmount() {
-    window.removeEventListener('storage', this.syncLoginState);
   },
 };
 </script>
 
-<style lang="css" scoped>
-.blog-container {
-  font-family: Arial, sans-serif;
-  margin: 0 auto; /*수평 중앙 정렬 */
-  padding: 15px;
-  border: 2px solid #ddd; /* 전체 컨테이너 테두리 */
-  border-radius: 10px; /* 둥근 모서리 */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-  max-width: 1200px;
-  background-color: #f4f4f4; /* 회색 배경 */
+<style scoped>
+.blogroot-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 0 64px 0;
+  background: #f7f8fa;
+  min-height: 100vh;
 }
 
-.blog-header {
+.blogroot-header {
   display: flex;
-  justify-content: space-between; /* 왼쪽, 가운데, 오른쪽 배치 */
+  justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #ccc;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0 32px 18px 32px;
+  border-bottom: 1.5px solid #e0e3e8;
+  background: #fff;
 }
 
-.menu-button {
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  padding: 5px 10px;
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #234567;
+  letter-spacing: -1px;
   cursor: pointer;
-  font-size: 14px;
-  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.header-actions button {
   margin-left: 10px;
-}
-
-.blog-title {
-  flex: 1;
-  text-align: center;
-  margin: 0;
-  font-size: 24px;/*폰트 사이즈 24고정 */
-}
-
-.header-buttons {
-  display: flex;
-  gap: 10px; /* 버튼 간격 */
-}
-
-.action-button {
-  background-color: #007bff;
-  color: white;
+  padding: 8px 18px;
   border: none;
-  padding: 5px 10px;
-  font-size: 14px;
+  border-radius: 8px;
+  background-color: #234567;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 5px;
+}
+.header-actions button:hover {
+  background: #18314c;
 }
 
-.main-content {
-  display: flex;
-  margin-top: 20px;
-  gap: 20px; /* 미리보기와 포스트 리스트 사이의 간격 */
+.nav-bar {
+  margin: 24px 0 12px 0;
+  padding: 0 32px;
+}
+.nav-button {
+  background: #6d7a86;
+  color: #fff;
+  padding: 8px 20px;
+  font-size: 15px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.nav-button:hover {
+  background: #49525a;
 }
 
-.preview-panel {
-  flex: 1;
-  background-color: #eaeaea;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 10px;
-  max-width: 200px;
+/* 게시글 카드 그리드 */
+.post-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  padding: 0 32px;
 }
 
-.preview-panel h3 {
-  margin: 0 0 10px 0;
-  font-size: 18px;
-}
-
-.preview-panel ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.preview-panel li {
-  padding: 5px 0;
-  border-bottom: 1px solid #ccc;
-  font-size: 14px;
-}
-
-.post-list {
-  flex: 2;
+/* 카드 스타일 */
+.post-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(60,80,100,0.07);
+  padding: 28px 24px 22px 24px;
+  cursor: pointer;
+  transition: box-shadow 0.18s, transform 0.18s;
+  border: 1.5px solid #eceef1;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: space-between;
+}
+.post-card:hover {
+  box-shadow: 0 8px 24px rgba(60,80,100,0.13);
+  transform: translateY(-4px) scale(1.02);
 }
 
-.post-item {
-  display: flex; /* 가로 정렬 */
-  flex-direction: column; /* 기본적으로 세로 정렬 */
-  gap: 10px; /* 요소 간 간격 */
-
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+/* 제목, 메타, 본문 */
+.post-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #234567;
+  line-height: 1.3;
 }
 .post-meta {
-  display: flex; /* 가로 정렬 */
-  justify-content: space-between; /* 양쪽 끝으로 배치 */
-  align-items: center; /* 수직 중앙 정렬 */
-}
-.meta-right{
   display: flex;
-  gap: 15px;
+  gap: 18px;
+  font-size: 13px;
+  color: #7a869a;
+  margin-bottom: 14px;
+  align-items: center;
 }
-.author{
-  font-size: 14px;
-}
-.date,
-.views{
-  font-size: 14px;
-}
-.post-item h2 {
-  /* margin: 0 0 5px 0; */
-  margin-bottom: 10px;
-  font-size: 20px;
-  color: #333;
+.post-content {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.7;
+  margin-top: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
 }
 
-.post-item p {
-  /* margin: 0; */
-  margin: 5px 0;
-  font-size: 14px;
-  color: #555
-}
 </style>
