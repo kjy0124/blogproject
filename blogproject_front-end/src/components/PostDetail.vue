@@ -241,19 +241,25 @@ export default {
 
 <style scoped>
 .blogroot-detail-wrap {
-  background: #fff;
+  padding-top: 84px;
   min-height: 100vh;
+  background: #fff;
   font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
 }
 
 .blogroot-detail-header {
-  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 84px;
+  background: #fff;
+  z-index: 1000;
   border-bottom: 1px solid #eee;
-  padding: 28px 0 18px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  padding: 0 20px;
 }
 
 .logo {
